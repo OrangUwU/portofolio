@@ -97,7 +97,7 @@ export function SiteHeader({ onContactOpen }: { onContactOpen?: () => void }) {
 
             {/* Direct Contact Button / Email Pill */}
             <div className="hidden sm:flex items-center gap-2">
-              <CopyEmailPill email="achmadtaufiqurrachman@gmail.com" align="end" />
+              <CopyEmailPill email="opekimut2@gmail.com" align="end" />
               {onContactOpen && (
                 <button
                   type="button"
@@ -153,7 +153,7 @@ export function SiteHeader({ onContactOpen }: { onContactOpen?: () => void }) {
                 </span>
                 <span className="tabular-nums">{time} UTC+7</span>
               </div>
-              <CopyEmailPill email="achmadtaufiqurrachman@gmail.com" align="center" />
+              <CopyEmailPill email="opekimut2@gmail.com" align="center" />
               {onContactOpen && (
                 <button
                   type="button"

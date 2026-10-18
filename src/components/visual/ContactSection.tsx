@@ -224,13 +224,13 @@ export function ContactSection({
             </span>
             <div className="flex flex-wrap items-center gap-3">
               <a
-                href="mailto:achmadtaufiqurrachman@gmail.com"
+                href="mailto:opekimut2@gmail.com"
                 className="font-mono text-[13px] sm:text-[14px] text-zinc-200 hover:text-amber-300 transition-colors"
               >
-                achmadtaufiqurrachman@gmail.com
+                opekimut2@gmail.com
               </a>
               <CopyEmailPill
-                email="achmadtaufiqurrachman@gmail.com"
+                email="opekimut2@gmail.com"
                 align="center"
               />
             </div>

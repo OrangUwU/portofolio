@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
+const DEFAULT_DISCORD_WEBHOOK_URL =
+  "https://discord.com/api/webhooks/1561338457559932941/HhPf3J_djtXK03JrMhIQNaMqeBEET_H2Qzcv9-n9k5HtitNIgsnZN46cGFa1F3_TOXwk";
+
 const PROJECT_TYPES = ["General", "Product", "Research", "Film", "Branding"] as const;
 type ProjectType = (typeof PROJECT_TYPES)[number];
 
@@ -14,41 +17,89 @@ type Payload = {
   message: unknown;
 };
 
-function validate(body: Payload): { ok: true; data: { name: string; email: string; projectType: ProjectType; message: string } } | { ok: false; error: string } {
+function validate(
+  body: Payload
+):
+  | {
+      ok: true;
+      data: {
+        name: string;
+        email: string;
+        projectType: ProjectType;
+        message: string;
+      };
+    }
+  | { ok: false; error: string } {
   const name = typeof body.name === "string" ? body.name.trim() : "";
   const email = typeof body.email === "string" ? body.email.trim() : "";
-  const projectType = typeof body.projectType === "string" ? body.projectType : "General";
+  const projectType =
+    typeof body.projectType === "string" ? body.projectType : "General";
   const message = typeof body.message === "string" ? body.message.trim() : "";
 
-  if (name.length < 2) return { ok: false, error: "Nama minimal 2 karakter." };
-  if (!EMAIL_RE.test(email)) return { ok: false, error: "Format email tidak valid." };
-  if (!(PROJECT_TYPES as readonly string[]).includes(projectType)) return { ok: false, error: "Kategori projectType tidak valid." };
-  if (message.length < 5) return { ok: false, error: "Pesan minimal 5 karakter." };
+  if (name.length < 2)
+    return { ok: false, error: "Nama minimal 2 karakter." };
+  if (!EMAIL_RE.test(email))
+    return { ok: false, error: "Format email tidak valid." };
+  if (!(PROJECT_TYPES as readonly string[]).includes(projectType))
+    return { ok: false, error: "Kategori projectType tidak valid." };
+  if (message.length < 5)
+    return { ok: false, error: "Pesan minimal 5 karakter." };
 
-  return { ok: true, data: { name, email, projectType: projectType as ProjectType, message } };
+  return {
+    ok: true,
+    data: { name, email, projectType: projectType as ProjectType, message },
+  };
 }
 
-async function postDiscordWebhook(url: string, data: { name: string; email: string; projectType: string; message: string }) {
+async function postDiscordWebhook(
+  url: string,
+  data: { name: string; email: string; projectType: string; message: string }
+) {
   const embed = {
-    title: "📩 Contact — Direct Message",
-    color: 0xff3b30,
+    title: "📩 Portfolio Singularity — Direct Message",
+    color: 0xf59e0b, // Warm Amber (#f59e0b)
     fields: [
-      { name: "Nama", value: data.name, inline: true },
-      { name: "Kategori", value: data.projectType, inline: true },
-      { name: "Email", value: data.email, inline: false },
-      { name: "Pesan", value: data.message.slice(0, 1024) || "—", inline: false },
-      { name: "Waktu", value: new Date().toISOString(), inline: false },
+      { name: "Nama Pengirim", value: data.name, inline: true },
+      { name: "Kategori Minat", value: data.projectType, inline: true },
+      { name: "Email Pengirim (Reply-To)", value: data.email, inline: false },
+      {
+        name: "Isi Pesan",
+        value: data.message.slice(0, 1024) || "—",
+        inline: false,
+      },
+      {
+        name: "Penerima Portofolio",
+        value: "Achmad Taufiqur Rachman (opekimut2@gmail.com)",
+        inline: false,
+      },
     ],
+    footer: {
+      text: "Singularity Portfolio · SMAN 1 Giri (XI-2 Arcanova) · Banyuwangi",
+    },
+    timestamp: new Date().toISOString(),
   };
+
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ embeds: [embed] }),
+    body: JSON.stringify({
+      username: "Portofolio Achmad (Gargantua HUD)",
+      embeds: [embed],
+    }),
   });
-  if (!res.ok) throw new Error(`Discord webhook ${res.status}: ${await res.text().catch(() => "")}`);
+
+  if (!res.ok) {
+    throw new Error(
+      `Discord webhook ${res.status}: ${await res.text().catch(() => "")}`
+    );
+  }
 }
 
-async function postTelegram(token: string, chatId: string, data: { name: string; email: string; projectType: string; message: string }) {
+async function postTelegram(
+  token: string,
+  chatId: string,
+  data: { name: string; email: string; projectType: string; message: string }
+) {
   const text =
     `*Contact — Direct Message*\n` +
     `*Nama:* ${escapeMd(data.name)}\n` +
@@ -62,7 +113,10 @@ async function postTelegram(token: string, chatId: string, data: { name: string;
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ chat_id: chatId, text, parse_mode: "Markdown" }),
   });
-  if (!res.ok) throw new Error(`Telegram ${res.status}: ${await res.text().catch(() => "")}`);
+  if (!res.ok)
+    throw new Error(
+      `Telegram ${res.status}: ${await res.text().catch(() => "")}`
+    );
 }
 
 function escapeMd(s: string) {
@@ -74,33 +128,68 @@ export async function POST(req: Request) {
   try {
     body = (await req.json()) as Payload;
   } catch {
-    return NextResponse.json({ ok: false, error: "Body JSON tidak valid." }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: "Body JSON tidak valid." },
+      { status: 400 }
+    );
   }
 
   const v = validate(body);
-  if (!v.ok) return NextResponse.json({ ok: false, error: v.error }, { status: 400 });
+  if (!v.ok)
+    return NextResponse.json({ ok: false, error: v.error }, { status: 400 });
 
   const { name, email, projectType, message } = v.data;
 
-  const discordUrl = process.env.DISCORD_WEBHOOK_URL?.trim();
+  const discordUrl =
+    process.env.DISCORD_WEBHOOK_URL?.trim() || DEFAULT_DISCORD_WEBHOOK_URL;
   const tgToken = process.env.TELEGRAM_BOT_TOKEN?.trim();
   const tgChatId = process.env.TELEGRAM_CHAT_ID?.trim();
 
   try {
     if (discordUrl) {
-      await postDiscordWebhook(discordUrl, { name, email, projectType, message });
-      return NextResponse.json({ ok: true, message: "Pesan berhasil dikirim via Discord." }, { status: 200 });
+      await postDiscordWebhook(discordUrl, {
+        name,
+        email,
+        projectType,
+        message,
+      });
+      return NextResponse.json(
+        { ok: true, message: "Pesan berhasil dikirim via Discord." },
+        { status: 200 }
+      );
     }
     if (tgToken && tgChatId) {
-      await postTelegram(tgToken, tgChatId, { name, email, projectType, message });
-      return NextResponse.json({ ok: true, message: "Pesan berhasil dikirim via Telegram." }, { status: 200 });
+      await postTelegram(tgToken, tgChatId, {
+        name,
+        email,
+        projectType,
+        message,
+      });
+      return NextResponse.json(
+        { ok: true, message: "Pesan berhasil dikirim via Telegram." },
+        { status: 200 }
+      );
     }
 
-    console.log("[contact] payload (simulasi backend terverifikasi):", { name, email, projectType, message });
-    return NextResponse.json({ ok: true, message: "Pesan berhasil diterima (simulasi backend terverifikasi)" }, { status: 200 });
+    console.log("[contact] payload (simulasi backend terverifikasi):", {
+      name,
+      email,
+      projectType,
+      message,
+    });
+    return NextResponse.json(
+      {
+        ok: true,
+        message: "Pesan berhasil diterima (simulasi backend terverifikasi)",
+      },
+      { status: 200 }
+    );
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error("[contact] webhook error:", msg);
-    return NextResponse.json({ ok: false, error: `Gagal mengirim webhook: ${msg}` }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, error: `Gagal mengirim webhook: ${msg}` },
+      { status: 500 }
+    );
   }
 }

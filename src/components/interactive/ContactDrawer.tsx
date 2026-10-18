@@ -172,7 +172,7 @@ export function ContactDrawer({
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
                     <label htmlFor="contact-name" className="block font-mono text-[11px] uppercase tracking-[0.14em] text-zinc-400">
-                      Nama <span className="text-[#FF3B30]">*</span>
+                      Nama <span className="text-amber-400">*</span>
                     </label>
                     <input
                       id="contact-name"
@@ -180,13 +180,13 @@ export function ContactDrawer({
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Nama lengkap atau panggilan"
-                      className="mt-2 w-full rounded-xl border border-zinc-800 bg-[#141416] px-4 py-3 font-sans text-[13.5px] text-white placeholder:text-zinc-600 transition-all focus:border-white/60 focus:bg-[#1A1A1E] focus:outline-none focus:ring-2 focus:ring-white/20"
+                      className="mt-2 w-full rounded-xl border border-zinc-800 bg-[#141416] px-4 py-3 font-sans text-[13.5px] text-white placeholder:text-zinc-600 transition-all focus:border-amber-500/60 focus:bg-[#1A1A1E] focus:outline-none focus:ring-2 focus:ring-amber-500/20"
                     />
                   </div>
 
                   <div>
                     <label htmlFor="contact-email" className="block font-mono text-[11px] uppercase tracking-[0.14em] text-zinc-400">
-                      Email <span className="text-[#FF3B30]">*</span>
+                      Email <span className="text-amber-400">*</span>
                     </label>
                     <input
                       id="contact-email"
@@ -195,7 +195,7 @@ export function ContactDrawer({
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="nama@perusahaan.com"
-                      className="mt-2 w-full rounded-xl border border-zinc-800 bg-[#141416] px-4 py-3 font-sans text-[13.5px] text-white placeholder:text-zinc-600 transition-all focus:border-white/60 focus:bg-[#1A1A1E] focus:outline-none focus:ring-2 focus:ring-white/20"
+                      className="mt-2 w-full rounded-xl border border-zinc-800 bg-[#141416] px-4 py-3 font-sans text-[13.5px] text-white placeholder:text-zinc-600 transition-all focus:border-amber-500/60 focus:bg-[#1A1A1E] focus:outline-none focus:ring-2 focus:ring-amber-500/20"
                     />
                   </div>
 
@@ -207,10 +207,10 @@ export function ContactDrawer({
                       id="contact-type"
                       value={projectType}
                       onChange={(e) => setProjectType(e.target.value as ProjectType)}
-                      className="mt-2 w-full rounded-xl border border-zinc-800 bg-[#141416] px-4 py-3 font-sans text-[13.5px] text-white transition-all focus:border-white/60 focus:bg-[#1A1A1E] focus:outline-none focus:ring-2 focus:ring-white/20 cursor-pointer"
+                      className="mt-2 w-full rounded-xl border border-zinc-800 bg-[#141416] px-4 py-3 font-sans text-[13.5px] text-white transition-all focus:border-amber-500/60 focus:bg-[#1A1A1E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 cursor-pointer"
                     >
                       <option value="General" className="bg-[#141416] text-white">General Inquiry</option>
-                      <option value="Product" className="bg-[#141416] text-white">Product Development (IJEN-CARE / Mobile)</option>
+                      <option value="Product" className="bg-[#141416] text-white">Product Development (IJEN-CARE / Smart-Node)</option>
                       <option value="Research" className="bg-[#141416] text-white">Quantitative & Field Research</option>
                       <option value="Film" className="bg-[#141416] text-white">Film & Mini Documentary</option>
                       <option value="Branding" className="bg-[#141416] text-white">Brand & Visual Identity</option>
@@ -219,7 +219,7 @@ export function ContactDrawer({
 
                   <div>
                     <label htmlFor="contact-message" className="block font-mono text-[11px] uppercase tracking-[0.14em] text-zinc-400">
-                      Pesan <span className="text-[#FF3B30]">*</span>
+                      Pesan <span className="text-amber-400">*</span>
                     </label>
                     <textarea
                       id="contact-message"
@@ -228,7 +228,7 @@ export function ContactDrawer({
                       onChange={(e) => setMessage(e.target.value)}
                       rows={5}
                       placeholder="Ceritakan proyek, kolaborasi, atau pertanyaanmu..."
-                      className="mt-2 w-full resize-none rounded-xl border border-zinc-800 bg-[#141416] px-4 py-3 font-sans text-[13.5px] text-white placeholder:text-zinc-600 transition-all focus:border-white/60 focus:bg-[#1A1A1E] focus:outline-none focus:ring-2 focus:ring-white/20"
+                      className="mt-2 w-full resize-none rounded-xl border border-zinc-800 bg-[#141416] px-4 py-3 font-sans text-[13.5px] text-white placeholder:text-zinc-600 transition-all focus:border-amber-500/60 focus:bg-[#1A1A1E] focus:outline-none focus:ring-2 focus:ring-amber-500/20"
                     />
                   </div>
 
@@ -240,7 +240,7 @@ export function ContactDrawer({
                       aria-live="polite"
                       className="flex items-center gap-2.5 rounded-xl border border-red-500/30 bg-red-950/40 px-4 py-3 font-mono text-[12px] leading-relaxed text-red-300 shadow-[0_0_20px_rgba(239,68,68,0.15)]"
                     >
-                      <AlertCircle className="h-4 w-4 shrink-0 text-[#FF3B30]" />
+                      <AlertCircle className="h-4 w-4 shrink-0 text-amber-400" />
                       <span>{errorMsg}</span>
                     </motion.div>
                   )}
@@ -254,18 +254,24 @@ export function ContactDrawer({
                     {loading ? (
                       <>
                         <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-300 border-t-black" />
-                        <span>Mengirim pesan...</span>
+                        <span>Mengirim ke Discord Webhook...</span>
                       </>
                     ) : (
                       <>
-                        <Send className="h-4 w-4" />
+                        <Send className="h-4 w-4 text-amber-600" />
                         <span>Kirim Pesan</span>
                       </>
                     )}
                   </button>
 
                   <p className="text-center font-mono text-[11px] text-zinc-500">
-                    Respon langsung ke email pengirim.
+                    Terhubung ke Discord Webhook &amp;{" "}
+                    <a
+                      href="mailto:opekimut2@gmail.com"
+                      className="text-amber-400 hover:underline"
+                    >
+                      opekimut2@gmail.com
+                    </a>
                   </p>
                 </form>
               )}
