@@ -21,6 +21,7 @@ import {
   Layers,
 } from "lucide-react";
 import { projects, type Project } from "@/content/projects";
+import { soundManager } from "@/lib/soundManager";
 import { ProjectDetailDrawer } from "./ProjectDetailDrawer";
 import { MediaModal } from "./MediaModal";
 import { LookbookModal } from "./LookbookModal";
@@ -204,8 +205,14 @@ export function ProjectRoom() {
   // Smooth camera & mouse state shared with the 60fps 3D canvas
   const mouseTargetRef = useRef({ x: 0, y: 0 });
   const activeRoomRef = useRef(0);
+  const hasMountedRef = useRef(false);
   useEffect(() => {
     activeRoomRef.current = active;
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+    soundManager.playTesseractRoomScrub(active);
   }, [active]);
 
   const mouseNormX = useMotionValue(0);

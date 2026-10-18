@@ -1,31 +1,37 @@
 "use client";
 
 // ============================================================================
-// POGGUFANZ-STYLE ZERO-LATENCY WEB AUDIO API & SFX ENGINE
-// Supports:
-// 1. Dynamic Scroll Mechanical Tick (throttled, tactile 0.15 - 0.22 volume)
-// 2. Interactive Cursor / Hover Micro-Beep (cards, tech stack badges, links, buttons)
-// 3. Cursor Velocity Trail Harmonic Pulse
-// 4. Quantum Warp Whoosh ("RETURN TO ORIGIN")
-// 5. Persistent Mute/Unmute state in localStorage + Autoplay Policy unlock
+// SECTION-AWARE SPATIAL AUDIO ENGINE (POGGUFANZ & INTERSTELLAR SPEC)
+// - Zero mouse-over-text noise!
+// - Every section has its own warm, low-pass filtered acoustic signature:
+//   * "singularity" (Hero #top): Deep relativistic sub-harmonic swell & low gravity pulse
+//   * "tesseract"   (#works): Warm 5D copper time-strand pluck & watch-escapement room scrub
+//   * "about"       (#about): Soft analog low-mid telemetry pulse
+//   * "experience"  (#experience): Muted pendulum / chronicle step tick
+//   * "contact"     (#contact): Warm harmonic fifth resonance & Quantum Warp Whoosh
 // ============================================================================
 
 const STORAGE_KEY = "portfolio_sfx_muted";
 
-type SfxKind = "scroll" | "hover" | "click";
-type Listener = (muted: boolean) => void;
+export type SectionAudioId =
+  | "singularity"
+  | "tesseract"
+  | "about"
+  | "experience"
+  | "contact";
+
+type Listener = (state: { muted: boolean; section: SectionAudioId }) => void;
 
 class SoundManager {
   private ctx: AudioContext | null = null;
   private isMuted = false;
   private isUnlocked = false;
-  private buffers: Partial<Record<SfxKind, AudioBuffer>> = {};
+  private currentSection: SectionAudioId = "singularity";
   private listeners = new Set<Listener>();
 
-  // Throttling timestamps (ms) to prevent audio stacking on ProMotion 120Hz displays
-  private lastScrollTickAt = 0;
-  private lastHoverTickAt = 0;
-  private lastTrailTickAt = 0;
+  // Strict cooldowns so audio never stacks or feels noisy
+  private lastScrollSoundAt = 0;
+  private lastSectionChangeAt = 0;
   private lastClickAt = 0;
 
   constructor() {
@@ -50,33 +56,14 @@ class SoundManager {
           .webkitAudioContext;
       if (AudioCtx) {
         this.ctx = new AudioCtx();
-        this.preloadAudioFiles();
       }
     }
     return this.ctx;
   }
 
-  private async preloadAudioFiles() {
-    const ctx = this.ctx;
-    if (!ctx) return;
-
-    const files: Record<SfxKind, string> = {
-      scroll: "/sounds/scroll-tick.wav",
-      hover: "/sounds/hover-tick.wav",
-      click: "/sounds/ui-click.wav",
-    };
-
-    for (const [key, url] of Object.entries(files) as [SfxKind, string][]) {
-      try {
-        const res = await fetch(url);
-        if (!res.ok) continue;
-        const arrayBuf = await res.arrayBuffer();
-        const decoded = await ctx.decodeAudioData(arrayBuf);
-        this.buffers[key] = decoded;
-      } catch {
-        // Procedural Web Audio synthesis remains active as zero-latency primary/fallback
-      }
-    }
+  private notify() {
+    const snapshot = { muted: this.isMuted, section: this.currentSection };
+    this.listeners.forEach((fn) => fn(snapshot));
   }
 
   public unlock = () => {
@@ -88,7 +75,6 @@ class SoundManager {
       ctx.resume().catch(() => {});
     }
 
-    // Play a silent 1-sample buffer to unlock iOS Safari / Chrome AudioContext
     try {
       const buf = ctx.createBuffer(1, 1, 22050);
       const src = ctx.createBufferSource();
@@ -105,6 +91,10 @@ class SoundManager {
     return this.isMuted;
   }
 
+  public getSection(): SectionAudioId {
+    return this.currentSection;
+  }
+
   public setMuted(muted: boolean) {
     this.isMuted = muted;
     if (typeof window !== "undefined") {
@@ -116,9 +106,9 @@ class SoundManager {
     }
     if (!muted) {
       this.unlock();
-      this.playClick();
+      this.playSectionTransitionChime(this.currentSection);
     }
-    this.listeners.forEach((fn) => fn(this.isMuted));
+    this.notify();
   }
 
   public toggleMute(): boolean {
@@ -126,164 +116,326 @@ class SoundManager {
     return this.isMuted;
   }
 
-  public subscribe(fn: Listener): () => void {
-    this.listeners.add(fn);
+  public subscribe(
+    fn: (muted: boolean, section?: SectionAudioId) => void
+  ): () => void {
+    const wrapped: Listener = (state) => fn(state.muted, state.section);
+    this.listeners.add(wrapped);
     return () => {
-      this.listeners.delete(fn);
+      this.listeners.delete(wrapped);
     };
   }
 
   /**
-   * 1. Dynamic Scroll Sound Effect:
-   * Subtle mechanical precision tick when scrolling past steps/thresholds.
-   * Volume: 0.16 - 0.22. Throttled to 72ms minimum interval so fast scrolling never stacks.
+   * Called when user scrolls from one major section into another.
+   * Plays a soft, atmospheric signature chord/swell unique to that section.
    */
-  public playScrollTick(velocityRatio = 0.5) {
-    if (this.isMuted) return;
-    const nowMs = performance.now();
-    if (nowMs - this.lastScrollTickAt < 72) return;
-    this.lastScrollTickAt = nowMs;
+  public setActiveSection(section: SectionAudioId) {
+    if (this.currentSection === section) return;
+    this.currentSection = section;
+    this.notify();
 
+    const nowMs = performance.now();
+    if (nowMs - this.lastSectionChangeAt < 650) return;
+    this.lastSectionChangeAt = nowMs;
+
+    this.playSectionTransitionChime(section);
+  }
+
+  /**
+   * Atmospheric Section Entry Sound (Unique per section, warm & low-frequency)
+   */
+  public playSectionTransitionChime(section: SectionAudioId) {
+    if (this.isMuted) return;
     const ctx = this.getAudioContext();
-    if (!ctx) return;
-    if (ctx.state === "suspended") {
-      ctx.resume().catch(() => {});
-    }
+    if (!ctx || ctx.state !== "running") return;
 
     const now = ctx.currentTime;
-    const clampedVel = Math.max(0, Math.min(1, velocityRatio));
-    const volume = 0.15 + clampedVel * 0.07; // 0.15 - 0.22
 
-    // Layer A: Preloaded acoustic sample (if ready) with slight pitch shift
-    if (this.buffers.scroll) {
-      try {
-        const src = ctx.createBufferSource();
-        src.buffer = this.buffers.scroll;
-        src.playbackRate.setValueAtTime(0.92 + clampedVel * 0.24, now);
+    if (section === "singularity") {
+      // Section 00 (Hero Black Hole): Deep Kerr gravitational sub-bass swell (65Hz -> 98Hz)
+      const osc = ctx.createOscillator();
+      const sub = ctx.createOscillator();
+      const filter = ctx.createBiquadFilter();
+      const gain = ctx.createGain();
+
+      osc.type = "sine";
+      sub.type = "triangle";
+      osc.frequency.setValueAtTime(65.41, now); // C2
+      osc.frequency.exponentialRampToValueAtTime(98.0, now + 0.55); // G2
+      sub.frequency.setValueAtTime(130.81, now); // C3
+
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(260, now);
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.075, now + 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.65);
+
+      osc.connect(filter);
+      sub.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      sub.start(now);
+      osc.stop(now + 0.68);
+      sub.stop(now + 0.68);
+    } else if (section === "tesseract") {
+      // Section 01 (Inside the Tesseract): Warm 5D copper harp/string fifth (A3 220Hz + E4 329.6Hz)
+      const freqs = [220.0, 329.63, 440.0];
+      freqs.forEach((f, idx) => {
+        const osc = ctx.createOscillator();
+        const filter = ctx.createBiquadFilter();
         const gain = ctx.createGain();
-        gain.gain.setValueAtTime(volume * 0.65, now);
-        src.connect(gain);
+
+        const start = now + idx * 0.045;
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(f, start);
+
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(900, start);
+        filter.frequency.exponentialRampToValueAtTime(280, start + 0.42);
+
+        gain.gain.setValueAtTime(0.001, start);
+        gain.gain.linearRampToValueAtTime(0.048 - idx * 0.01, start + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0008, start + 0.45);
+
+        osc.connect(filter);
+        filter.connect(gain);
         gain.connect(ctx.destination);
-        src.start(now);
-      } catch {
-        // fallback to synthesis below
-      }
+
+        osc.start(start);
+        osc.stop(start + 0.48);
+      });
+    } else if (section === "about") {
+      // Section 02 (About & Profile): Soft warm analog two-note interval (D3 146.8Hz -> A3 220Hz)
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(146.83, now);
+      osc.frequency.setValueAtTime(220.0, now + 0.08);
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.05, now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.36);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.38);
+    } else if (section === "experience") {
+      // Section 03 (Experience Chronicle): Warm low clockwork chime (E3 164.8Hz -> B3 246.9Hz)
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(164.81, now);
+      osc.frequency.exponentialRampToValueAtTime(246.94, now + 0.22);
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.048, now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.32);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.34);
+    } else if (section === "contact") {
+      // Section 04 (Contact & Origin): Warm golden resolution chord (F3 174.6Hz + C4 261.6Hz)
+      [174.61, 261.63].forEach((f, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const start = now + idx * 0.05;
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(f, start);
+
+        gain.gain.setValueAtTime(0.001, start);
+        gain.gain.linearRampToValueAtTime(0.045, start + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.0008, start + 0.5);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(start);
+        osc.stop(start + 0.52);
+      });
     }
-
-    // Layer B: Zero-latency procedural mechanical escapement click
-    const osc = ctx.createOscillator();
-    const filter = ctx.createBiquadFilter();
-    const gain = ctx.createGain();
-
-    osc.type = "triangle";
-    const baseFreq = 1180 + clampedVel * 420;
-    osc.frequency.setValueAtTime(baseFreq, now);
-    osc.frequency.exponentialRampToValueAtTime(320, now + 0.018);
-
-    filter.type = "bandpass";
-    filter.frequency.setValueAtTime(1400, now);
-    filter.Q.setValueAtTime(3.2, now);
-
-    gain.gain.setValueAtTime(0.001, now);
-    gain.gain.linearRampToValueAtTime(volume, now + 0.002);
-    gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.022);
-
-    osc.connect(filter);
-    filter.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.start(now);
-    osc.stop(now + 0.024);
   }
 
   /**
-   * 2. Interactive Cursor Hover Tick / Micro-Beep:
-   * Triggered when cursor crosses project cards, tech stack badges, social links, or buttons.
+   * Section-Specific Scroll Sound:
+   * Triggered only every ~220px of scroll with a minimum 180ms cooldown.
+   * Each section has a completely different, warm, non-intrusive acoustic texture!
    */
-  public playHoverTick(
-    variant: "card" | "badge" | "link" | "button" = "button"
-  ) {
+  public playSectionScrollStep(velocityRatio = 0.4) {
     if (this.isMuted) return;
     const nowMs = performance.now();
-    if (nowMs - this.lastHoverTickAt < 45) return;
-    this.lastHoverTickAt = nowMs;
-
-    const ctx = this.getAudioContext();
-    if (!ctx) return;
-    if (ctx.state === "suspended") {
-      ctx.resume().catch(() => {});
-    }
-
-    const now = ctx.currentTime;
-    const freqMap = {
-      card: 1680,
-      badge: 2480,
-      link: 2120,
-      button: 1920,
-    };
-    const startFreq = freqMap[variant];
-    const volume = variant === "badge" ? 0.14 : 0.17;
-
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(startFreq, now);
-    osc.frequency.exponentialRampToValueAtTime(startFreq * 1.28, now + 0.024);
-
-    gain.gain.setValueAtTime(0.001, now);
-    gain.gain.linearRampToValueAtTime(volume, now + 0.003);
-    gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.028);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.start(now);
-    osc.stop(now + 0.03);
-  }
-
-  /**
-   * 3. Subtle Cursor Velocity Trail Micro-Tick:
-   * Gently responds to rapid cursor sweeps across the 5D spacetime canvas.
-   */
-  public playCursorTrailPulse(speedPxPerMs: number) {
-    if (this.isMuted) return;
-    const nowMs = performance.now();
-    if (nowMs - this.lastTrailTickAt < 155) return;
-    this.lastTrailTickAt = nowMs;
+    if (nowMs - this.lastScrollSoundAt < 185) return;
+    this.lastScrollSoundAt = nowMs;
 
     const ctx = this.getAudioContext();
     if (!ctx || ctx.state !== "running") return;
 
     const now = ctx.currentTime;
-    const norm = Math.min(1, Math.max(0, (speedPxPerMs - 1.8) / 4.0));
-    const volume = 0.045 + norm * 0.055; // Ultra-gentle 0.045 - 0.10
+    const v = Math.max(0, Math.min(1, velocityRatio));
 
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
+    if (this.currentSection === "singularity") {
+      // Hero Black Hole: Deep muffled magnetic horizon pulse (90Hz -> 52Hz)
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
 
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(1450 + norm * 650, now);
-    osc.frequency.exponentialRampToValueAtTime(880, now + 0.016);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(95 + v * 28, now);
+      osc.frequency.exponentialRampToValueAtTime(48, now + 0.065);
 
-    gain.gain.setValueAtTime(0.0008, now);
-    gain.gain.linearRampToValueAtTime(volume, now + 0.002);
-    gain.gain.exponentialRampToValueAtTime(0.0005, now + 0.018);
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.065, now + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.07);
 
-    osc.connect(gain);
-    gain.connect(ctx.destination);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
 
-    osc.start(now);
-    osc.stop(now + 0.02);
+      osc.start(now);
+      osc.stop(now + 0.075);
+    } else if (this.currentSection === "tesseract") {
+      // Tesseract Section: Warm 5D copper wire / wooden bookcase harmonic pluck (280Hz -> 190Hz)
+      const osc = ctx.createOscillator();
+      const filter = ctx.createBiquadFilter();
+      const gain = ctx.createGain();
+
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(290 + v * 60, now);
+      osc.frequency.exponentialRampToValueAtTime(175, now + 0.045);
+
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(520, now);
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.052, now + 0.004);
+      gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.05);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.055);
+    } else if (this.currentSection === "about") {
+      // About Section: Soft muted low-pass carbon tap (210Hz -> 120Hz)
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(215 + v * 35, now);
+      osc.frequency.exponentialRampToValueAtTime(115, now + 0.032);
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.042, now + 0.003);
+      gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.036);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.04);
+    } else if (this.currentSection === "experience") {
+      // Experience Timeline: Soft watch-escapement pendulum tick (240Hz -> 140Hz)
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(245, now);
+      osc.frequency.exponentialRampToValueAtTime(135, now + 0.028);
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.04, now + 0.003);
+      gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.032);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.035);
+    } else {
+      // Contact & Origin: Warm orbital harmonic pulse (196Hz G3)
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(196 + v * 40, now);
+      osc.frequency.exponentialRampToValueAtTime(146.8, now + 0.045);
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.045, now + 0.005);
+      gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.05);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.055);
+    }
   }
 
   /**
-   * 4. UI Click Confirmation SFX:
+   * Dedicated Tesseract Room Scrub Sound (When clicking <, >, or timeline nodes 01-05):
+   * Plays a pitched 5D time-strand harmonic chord based on room index (0..4).
+   */
+  public playTesseractRoomScrub(roomIndex: number) {
+    if (this.isMuted) return;
+    const ctx = this.getAudioContext();
+    if (!ctx) return;
+    if (ctx.state === "suspended") {
+      ctx.resume().catch(() => {});
+    }
+
+    const now = ctx.currentTime;
+    // Pentatonic warm frequencies for Rooms 01 -> 05
+    const roomNotes = [220.0, 246.94, 293.66, 329.63, 392.0];
+    const baseFreq = roomNotes[roomIndex % roomNotes.length] || 220.0;
+
+    const osc = ctx.createOscillator();
+    const overtone = ctx.createOscillator();
+    const filter = ctx.createBiquadFilter();
+    const gain = ctx.createGain();
+
+    osc.type = "triangle";
+    overtone.type = "sine";
+    osc.frequency.setValueAtTime(baseFreq, now);
+    osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.005, now + 0.18);
+    overtone.frequency.setValueAtTime(baseFreq * 1.5, now);
+
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(780, now);
+    filter.frequency.exponentialRampToValueAtTime(260, now + 0.22);
+
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.075, now + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.24);
+
+    osc.connect(filter);
+    overtone.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    overtone.start(now);
+    osc.stop(now + 0.25);
+    overtone.stop(now + 0.25);
+  }
+
+  /**
+   * Subtle tactile click ONLY when clicking interactive buttons/links (never on text hover!)
    */
   public playClick() {
     if (this.isMuted) return;
     const nowMs = performance.now();
-    if (nowMs - this.lastClickAt < 55) return;
+    if (nowMs - this.lastClickAt < 90) return;
     this.lastClickAt = nowMs;
 
     const ctx = this.getAudioContext();
@@ -296,24 +448,33 @@ class SoundManager {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
-    osc.type = "triangle";
-    osc.frequency.setValueAtTime(920, now);
-    osc.frequency.exponentialRampToValueAtTime(1840, now + 0.036);
+    // Section-aware click pitch (warm low-mid, never piercing)
+    const clickFreqMap: Record<SectionAudioId, number> = {
+      singularity: 180,
+      tesseract: 330,
+      about: 260,
+      experience: 240,
+      contact: 293,
+    };
+    const freq = clickFreqMap[this.currentSection] || 260;
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(freq, now);
+    osc.frequency.exponentialRampToValueAtTime(freq * 1.4, now + 0.032);
 
     gain.gain.setValueAtTime(0.001, now);
-    gain.gain.linearRampToValueAtTime(0.21, now + 0.003);
-    gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.04);
+    gain.gain.linearRampToValueAtTime(0.08, now + 0.003);
+    gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.038);
 
     osc.connect(gain);
     gain.connect(ctx.destination);
 
     osc.start(now);
-    osc.stop(now + 0.042);
+    osc.stop(now + 0.04);
   }
 
   /**
-   * 5. Quantum Warp Whoosh ("RETURN TO ORIGIN"):
-   * Relativistic Bandpass Noise Sweep (100Hz -> 1600Hz -> 200Hz) + Wormhole Sub-Bass Drone
+   * Quantum Warp Whoosh ("RETURN TO ORIGIN"):
    */
   public playQuantumWarpWhoosh() {
     if (this.isMuted) return null;
@@ -346,7 +507,7 @@ class SoundManager {
 
       const noiseGain = ctx.createGain();
       noiseGain.gain.setValueAtTime(0.001, now);
-      noiseGain.gain.exponentialRampToValueAtTime(0.24, now + 0.68);
+      noiseGain.gain.exponentialRampToValueAtTime(0.22, now + 0.68);
       noiseGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
 
       whiteNoise.connect(bandpass);
@@ -361,7 +522,7 @@ class SoundManager {
 
       const oscGain = ctx.createGain();
       oscGain.gain.setValueAtTime(0.001, now);
-      oscGain.gain.exponentialRampToValueAtTime(0.18, now + 0.65);
+      oscGain.gain.exponentialRampToValueAtTime(0.16, now + 0.65);
       oscGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
 
       osc.connect(oscGain);

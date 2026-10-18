@@ -1,17 +1,28 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
-import { soundManager } from "@/lib/soundManager";
+import { soundManager, type SectionAudioId } from "@/lib/soundManager";
+
+const SECTION_MAP: { id: string; audioId: SectionAudioId; label: string }[] = [
+  { id: "contact", audioId: "contact", label: "CONTACT" },
+  { id: "experience", audioId: "experience", label: "CHRONOLOGY" },
+  { id: "about", audioId: "about", label: "TELEMETRY" },
+  { id: "works", audioId: "tesseract", label: "TESSERACT" },
+  { id: "top", audioId: "singularity", label: "SINGULARITY" },
+];
 
 export function AudioController() {
   const [isMuted, setIsMuted] = useState(false);
-  const lastHoveredElRef = useRef<Element | null>(null);
+  const [activeSection, setActiveSection] =
+    useState<SectionAudioId>("singularity");
 
   useEffect(() => {
     setIsMuted(soundManager.getMuted());
-    const unsub = soundManager.subscribe((muted) => {
+    setActiveSection(soundManager.getSection());
+    const unsub = soundManager.subscribe((muted, section) => {
       setIsMuted(muted);
+      if (section) setActiveSection(section);
     });
     return unsub;
   }, []);
@@ -26,11 +37,26 @@ export function AudioController() {
     window.addEventListener("touchstart", handleUnlock, { passive: true });
     window.addEventListener("keydown", handleUnlock, { passive: true });
 
-    // 2. Dynamic Scroll Sound Effect (Step threshold ~110px + velocity ratio, passive listener)
+    // 2. Section Detection + Section-Specific Scroll Sound Effect (Passive listener)
+    // No mousemove or hover sounds on text! Sound only responds to section context & deliberate actions.
     let lastScrollY = window.scrollY;
     let lastScrollTime = performance.now();
     let accumulatedDelta = 0;
-    const SCROLL_STEP_PX = 110;
+    const SCROLL_STEP_PX = 220;
+
+    const detectActiveSection = (): SectionAudioId => {
+      const viewportCenter = window.innerHeight * 0.42;
+      for (const item of SECTION_MAP) {
+        const el = document.getElementById(item.id);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= viewportCenter && rect.bottom >= viewportCenter * 0.25) {
+            return item.audioId;
+          }
+        }
+      }
+      return window.scrollY < 500 ? "singularity" : soundManager.getSection();
+    };
 
     const handleScroll = () => {
       const now = performance.now();
@@ -38,65 +64,27 @@ export function AudioController() {
       const dy = Math.abs(currentY - lastScrollY);
       const dt = Math.max(1, now - lastScrollTime);
 
-      accumulatedDelta += dy;
+      // Check if user entered a different section and switch acoustic signature
+      const detectedSection = detectActiveSection();
+      if (detectedSection !== soundManager.getSection()) {
+        soundManager.setActiveSection(detectedSection);
+        accumulatedDelta = 0;
+      } else {
+        accumulatedDelta += dy;
+        if (accumulatedDelta >= SCROLL_STEP_PX) {
+          accumulatedDelta = accumulatedDelta % SCROLL_STEP_PX;
+          const velocityRatio = Math.min(1, dy / dt / 2.5);
+          soundManager.playSectionScrollStep(velocityRatio);
+        }
+      }
+
       lastScrollY = currentY;
       lastScrollTime = now;
-
-      if (accumulatedDelta >= SCROLL_STEP_PX) {
-        accumulatedDelta = accumulatedDelta % SCROLL_STEP_PX;
-        const velocityRatio = Math.min(1, dy / dt / 2.5);
-        soundManager.playScrollTick(velocityRatio);
-      }
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
 
-    // 3. Interactive Cursor / Hover Micro-Beep & Velocity Trail Audio (Passive listeners)
-    let lastMouseX = 0;
-    let lastMouseY = 0;
-    let lastMouseTime = performance.now();
-
-    const handlePointerMove = (e: PointerEvent) => {
-      if (e.pointerType !== "mouse") return;
-      const now = performance.now();
-      const dt = now - lastMouseTime;
-      if (dt > 16) {
-        const dist = Math.hypot(e.clientX - lastMouseX, e.clientY - lastMouseY);
-        const speed = dist / dt; // px per ms
-        if (speed > 2.1) {
-          soundManager.playCursorTrailPulse(speed);
-        }
-        lastMouseX = e.clientX;
-        lastMouseY = e.clientY;
-        lastMouseTime = now;
-      }
-    };
-
-    const handleMouseOver = (e: MouseEvent) => {
-      const target = e.target as Element | null;
-      if (!target) return;
-
-      const interactiveEl = target.closest(
-        'button, a, [role="button"], [data-sfx]'
-      );
-
-      if (interactiveEl && interactiveEl !== lastHoveredElRef.current) {
-        lastHoveredElRef.current = interactiveEl;
-        const sfxAttr = interactiveEl.getAttribute("data-sfx");
-        if (sfxAttr === "badge") {
-          soundManager.playHoverTick("badge");
-        } else if (sfxAttr === "card") {
-          soundManager.playHoverTick("card");
-        } else if (interactiveEl.tagName === "A") {
-          soundManager.playHoverTick("link");
-        } else {
-          soundManager.playHoverTick("button");
-        }
-      } else if (!interactiveEl) {
-        lastHoveredElRef.current = null;
-      }
-    };
-
+    // 3. Deliberate Click / Tap Feedback on Buttons & Links only (Zero hover noise on text)
     const handlePointerDown = (e: PointerEvent) => {
       const target = e.target as Element | null;
       if (!target) return;
@@ -106,10 +94,6 @@ export function AudioController() {
       }
     };
 
-    window.addEventListener("pointermove", handlePointerMove, {
-      passive: true,
-    });
-    window.addEventListener("mouseover", handleMouseOver, { passive: true });
     window.addEventListener("pointerdown", handlePointerDown, {
       passive: true,
     });
@@ -119,11 +103,13 @@ export function AudioController() {
       window.removeEventListener("touchstart", handleUnlock);
       window.removeEventListener("keydown", handleUnlock);
       window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("mouseover", handleMouseOver);
       window.removeEventListener("pointerdown", handlePointerDown);
     };
   }, []);
+
+  const sectionLabel =
+    SECTION_MAP.find((s) => s.audioId === activeSection)?.label ??
+    "SINGULARITY";
 
   return (
     <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40">
@@ -131,7 +117,7 @@ export function AudioController() {
         type="button"
         onClick={() => soundManager.toggleMute()}
         aria-label={
-          isMuted ? "Unmute interactive sound effects" : "Mute sound effects"
+          isMuted ? "Unmute spatial section audio" : "Mute spatial section audio"
         }
         aria-pressed={!isMuted}
         className="group flex items-center gap-2.5 rounded-full border border-amber-500/30 bg-[#06070D]/90 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-200 backdrop-blur-xl shadow-[0_0_25px_rgba(0,0,0,0.85)] hover:border-amber-400 hover:text-white active:scale-95 transition-all cursor-pointer touch-manipulation"
@@ -143,10 +129,7 @@ export function AudioController() {
         )}
 
         {/* Animated Waveform Indicator Bars */}
-        <span
-          className="flex items-end gap-[2px] h-3"
-          aria-hidden="true"
-        >
+        <span className="flex items-end gap-[2px] h-3" aria-hidden="true">
           <span
             className={`w-[2px] rounded-full transition-all duration-300 ${
               isMuted
@@ -171,9 +154,10 @@ export function AudioController() {
         </span>
 
         <span className="hidden xs:inline">
-          {isMuted ? "SFX OFF" : "SFX ON"}
+          {isMuted ? "SFX OFF" : `SFX · ${sectionLabel}`}
         </span>
       </button>
     </div>
   );
 }
+
