@@ -128,7 +128,10 @@ export function ExperienceSection() {
       <div className="mt-12 space-y-6">
         {ROLES.map((role, i) => (
           <SectionReveal key={role.idx} delay={i * 0.06}>
-            <article className="group relative overflow-hidden rounded-2xl border border-white/10 bg-[#08090F]/85 p-6 sm:p-8 backdrop-blur-md hover:border-amber-500/30 hover:bg-[#0b0c14] transition-all duration-300 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]">
+            <article
+              data-sfx="card"
+              className="group relative overflow-hidden rounded-2xl border border-white/10 bg-[#08090F]/85 p-6 sm:p-8 backdrop-blur-md hover:border-amber-500/30 hover:bg-[#0b0c14] transition-all duration-300 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]"
+            >
               {/* Header Row: Index, Status Pill, Period */}
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
                 <div className="flex items-center gap-3">
@@ -190,7 +193,8 @@ export function ExperienceSection() {
                 {role.chips.map((chip) => (
                   <span
                     key={chip}
-                    className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 font-mono text-[10.5px] text-zinc-300 group-hover:border-amber-500/30 group-hover:text-amber-200 transition-colors"
+                    data-sfx="badge"
+                    className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 font-mono text-[10.5px] text-zinc-300 group-hover:border-amber-500/30 group-hover:text-amber-200 transition-colors cursor-default"
                   >
                     {chip}
                   </span>

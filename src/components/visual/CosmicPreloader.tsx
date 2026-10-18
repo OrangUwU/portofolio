@@ -323,20 +323,20 @@ export function CosmicPreloader({ onComplete }: CosmicPreloaderProps) {
           </AnimatePresence>
 
           {/* Top Telemetry Header & Skip ESC Button */}
-          <div className="relative z-20 flex items-center justify-between font-mono text-[10.5px] uppercase tracking-[0.22em] text-zinc-500">
-            <div className="flex items-center gap-2.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_#f59e0b] animate-pulse" />
-              <span className="text-zinc-400">
-                ACHMAD TAUFIQUR RACHMAN // SINGULARITY ARCHIVE
+          <div className="relative z-20 flex items-center justify-between gap-2 font-mono text-[9.5px] sm:text-[10.5px] uppercase tracking-[0.16em] sm:tracking-[0.22em] text-zinc-500">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500 shadow-[0_0_8px_#f59e0b] animate-pulse" />
+              <span className="text-zinc-400 truncate">
+                ACHMAD TAUFIQUR RACHMAN // SINGULARITY
               </span>
             </div>
 
             <button
               type="button"
               onClick={finishPreloader}
-              className="rounded-full border border-white/15 bg-white/[0.04] px-3.5 py-1 text-[10px] tracking-[0.2em] text-zinc-300 hover:border-amber-400 hover:text-white transition-colors cursor-pointer"
+              className="shrink-0 rounded-full border border-white/15 bg-white/[0.04] px-3 sm:px-3.5 py-1 text-[9.5px] sm:text-[10px] tracking-[0.18em] text-zinc-300 hover:border-amber-400 hover:text-white transition-colors cursor-pointer touch-manipulation"
             >
-              Skip ESC
+              Skip <span className="hidden sm:inline">ESC</span>
             </button>
           </div>
 
@@ -358,13 +358,13 @@ export function CosmicPreloader({ onComplete }: CosmicPreloaderProps) {
                     }
               }
               transition={{ duration: 0.48, ease: [0.16, 1, 0.3, 1] }}
-              className="origin-left font-mono text-[90px] sm:text-[140px] md:text-[180px] font-light text-white tracking-tighter leading-none tabular-nums drop-shadow-[0_0_35px_rgba(245,158,11,0.22)]"
+              className="origin-left font-mono text-[82px] sm:text-[140px] md:text-[180px] font-light text-white tracking-tighter leading-none tabular-nums drop-shadow-[0_0_35px_rgba(245,158,11,0.22)]"
             >
               {formattedCounter}
             </motion.div>
 
             {/* Expanding Amber Horizon Line */}
-            <div className="mt-6 sm:mt-8 relative h-[1.5px] w-full bg-white/10 overflow-hidden">
+            <div className="mt-5 sm:mt-8 relative h-[1.5px] w-full bg-white/10 overflow-hidden">
               <motion.div
                 className="absolute inset-y-0 left-0 bg-gradient-to-r from-amber-600 via-amber-400 to-[#fffbeb] shadow-[0_0_16px_#f59e0b]"
                 style={{ width: `${progress}%` }}
@@ -372,7 +372,7 @@ export function CosmicPreloader({ onComplete }: CosmicPreloaderProps) {
             </div>
 
             {/* Bottom Telemetry Row: COSMIC DAWN 100 Myr & BANYUWANGI, ID */}
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-4 font-mono text-[10.5px] sm:text-[11px] uppercase tracking-[0.24em] text-zinc-500">
+            <div className="mt-3.5 sm:mt-4 flex flex-wrap items-center justify-between gap-2 sm:gap-4 font-mono text-[9.5px] sm:text-[11px] uppercase tracking-[0.18em] sm:tracking-[0.24em] text-zinc-500">
               <div className="flex items-center gap-3">
                 <span className="text-amber-400 font-semibold">
                   COSMIC DAWN 100 Myr

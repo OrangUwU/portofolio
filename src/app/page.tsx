@@ -9,6 +9,7 @@ import { AboutSection } from "@/components/visual/AboutSection";
 import { ExperienceSection } from "@/components/visual/ExperienceSection";
 import { ContactSection } from "@/components/visual/ContactSection";
 import { ContactDrawer } from "@/components/interactive/ContactDrawer";
+import { AudioController } from "@/components/interactive/AudioController";
 
 export default function Page() {
   const [isContactOpen, setIsContactOpen] = useState(false);
@@ -53,6 +54,9 @@ export default function Page() {
         isOpen={isContactOpen}
         onClose={() => setIsContactOpen(false)}
       />
+
+      {/* 8. Global Interactive SFX Engine & Floating Mute/Unmute HUD Toggle */}
+      <AudioController />
     </div>
   );
 }

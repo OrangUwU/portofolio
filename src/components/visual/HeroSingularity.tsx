@@ -8,7 +8,7 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import { ArrowDown, ArrowUpRight, Compass, Radio } from "lucide-react";
+import { ArrowDown, ArrowUpRight, Compass, Github, Instagram, Radio } from "lucide-react";
 
 interface HeroSingularityProps {
   onContactOpen?: () => void;
@@ -532,12 +532,12 @@ export function HeroSingularity({ onContactOpen }: HeroSingularityProps) {
       data-world="blackhole"
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
-      className="relative h-[180vh] w-full bg-[#030409] select-none"
+      className="relative h-[175vh] sm:h-[180vh] w-full bg-[#030409] select-none touch-pan-y"
     >
-      {/* STICKY 100VH VIEWPORT FOR SMOOTH 60FPS SCROLLYTELLING ZOOM DIVE */}
+      {/* STICKY 100SVH VIEWPORT FOR SMOOTH 60FPS SCROLLYTELLING ZOOM DIVE */}
       <div
         style={{ perspective: "1400px" }}
-        className="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-between px-4 sm:px-8 lg:px-14 pt-20 sm:pt-24 pb-8 sm:pb-10"
+        className="sticky top-0 h-[100svh] min-h-[580px] w-full overflow-hidden flex flex-col justify-between px-4 sm:px-8 lg:px-14 pt-16 sm:pt-24 pb-6 sm:pb-10"
       >
         {/* 1. Deep Space Cosmic Starfield & Relativistic Lensing Grid */}
         <div
@@ -551,8 +551,19 @@ export function HeroSingularity({ onContactOpen }: HeroSingularityProps) {
         />
 
         {/* 2. Ambient Relativistic Nebula & Doppler Asymmetric Glow */}
-        <div className="pointer-events-none absolute right-[4%] top-[40%] h-[680px] w-[680px] -translate-y-1/2 rounded-full bg-gradient-to-tr from-amber-600/[0.17] via-amber-400/[0.08] to-transparent blur-[140px]" />
-        <div className="pointer-events-none absolute left-[38%] top-[30%] h-[420px] w-[420px] rounded-full bg-amber-200/[0.07] blur-[120px]" />
+        <div className="pointer-events-none absolute right-[4%] top-[40%] h-[420px] sm:h-[680px] w-[420px] sm:w-[680px] -translate-y-1/2 rounded-full bg-gradient-to-tr from-amber-600/[0.17] via-amber-400/[0.08] to-transparent blur-[120px] sm:blur-[140px]" />
+        <div className="pointer-events-none absolute left-[25%] sm:left-[38%] top-[28%] h-[280px] sm:h-[420px] w-[280px] sm:w-[420px] rounded-full bg-amber-200/[0.07] blur-[100px] sm:blur-[120px]" />
+
+        {/* Mobile Compact FIG. 00 Telemetry Badge (Visible on Mobile HP) */}
+        <motion.div
+          style={{ opacity: calloutOpacity }}
+          className="md:hidden relative z-20 flex items-center justify-between rounded-full border border-amber-500/25 bg-black/70 px-3 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-300 backdrop-blur-md"
+        >
+          <span className="text-amber-400 font-bold">FIG. 00 // KERR METRIC</span>
+          <span className="text-amber-200">
+            a≈0.998M · δ={dopplerReadout}
+          </span>
+        </motion.div>
 
         {/* =========================================================================
             3. GARGANTUA KERR BLACK HOLE (WIDE 1200x900 VIEWBOX — ZERO BOUNDING BOX & 60FPS)
@@ -560,7 +571,7 @@ export function HeroSingularity({ onContactOpen }: HeroSingularityProps) {
         <div
           data-anchor="blackhole"
           aria-hidden="true"
-          className="pointer-events-none absolute aspect-[4/3] -translate-x-1/2 -translate-y-1/2 left-1/2 top-[36%] w-[min(125vw,1050px)] md:left-[61%] md:top-[42%] md:w-[min(86vw,1180px)] z-10 overflow-visible"
+          className="pointer-events-none absolute aspect-[4/3] -translate-x-1/2 -translate-y-1/2 left-1/2 top-[34%] w-[136vw] sm:w-[min(120vw,1050px)] md:left-[61%] md:top-[42%] md:w-[min(86vw,1180px)] z-10 overflow-visible"
         >
           <motion.div
             style={{
@@ -1014,16 +1025,16 @@ export function HeroSingularity({ onContactOpen }: HeroSingularityProps) {
           className="relative z-20 max-w-[760px] pb-4 select-none will-change-transform transform-gpu"
         >
           {/* Live Telemetry Pill above Headline */}
-          <div className="mb-4 inline-flex items-center gap-2.5 rounded-full border border-amber-500/25 bg-amber-500/[0.06] px-3.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-amber-300 backdrop-blur-md">
-            <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b] animate-pulse" />
-            <span>SINGULARITY HORIZON // SMAN 1 GIRI · ARCANOVA XI-2</span>
+          <div className="mb-3 sm:mb-4 inline-flex items-center gap-2 rounded-full border border-amber-500/25 bg-amber-500/[0.06] px-3 sm:px-3.5 py-1 font-mono text-[8.5px] sm:text-[10px] uppercase tracking-[0.16em] sm:tracking-[0.2em] text-amber-300 backdrop-blur-md">
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b] animate-pulse" />
+            <span className="truncate">SINGULARITY HORIZON // SMAN 1 GIRI · ARCANOVA XI-2</span>
           </div>
 
-          {/* Editorial Headline: Light + Bold contrast */}
+          {/* Editorial Headline: Fluid responsive scaling for mobile (320px-430px) up to desktop */}
           <h1
             id="hero-heading"
             tabIndex={-1}
-            className="font-sans text-[48px] sm:text-[76px] md:text-[96px] lg:text-[112px] leading-[0.88] tracking-[-0.04em] text-white"
+            className="font-sans text-[clamp(2.1rem,8.8vw,7rem)] leading-[0.9] tracking-[-0.04em] text-white"
           >
             <span className="font-light text-white block">ACHMAD</span>
             <span className="font-black text-zinc-100 tracking-tight block">
@@ -1031,13 +1042,13 @@ export function HeroSingularity({ onContactOpen }: HeroSingularityProps) {
             </span>
           </h1>
 
-          {/* Lede summary statement */}
-          <p className="mt-5 sm:mt-6 max-w-[44ch] font-sans text-[15px] sm:text-[16.5px] leading-relaxed text-zinc-300">
-            Building scalable web &amp; mobile systems, exploring GIS spatial mobility, empirical data research, and creative engineering.
+          {/* Lede summary statement (Tech Engineer / Vibecoder Bio) */}
+          <p className="mt-3.5 sm:mt-6 max-w-[48ch] font-sans text-[13.5px] sm:text-[16.5px] leading-relaxed text-zinc-300">
+            Mobile &amp; Full-Stack Builder specializing in Geotourism &amp; Spatial Systems. Rapid prototyping, clean architecture, and shipping fast.
           </p>
 
-          {/* Action Controls: Get In Touch + GitHub + LinkedIn */}
-          <div className="mt-7 flex flex-wrap items-center gap-3 sm:gap-4">
+          {/* Action Controls: Get In Touch + GitHub (@OrangUwU) + Instagram (@okayopek) */}
+          <div className="mt-5 sm:mt-7 flex flex-wrap items-center gap-2.5 sm:gap-4">
             {onContactOpen ? (
               <button
                 type="button"
@@ -1063,23 +1074,25 @@ export function HeroSingularity({ onContactOpen }: HeroSingularityProps) {
 
             {/* GitHub Link */}
             <a
-              href="https://github.com/achmadtaufiqurrachman"
+              href="https://github.com/OrangUwU"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex min-h-[42px] items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-4 font-mono text-[11px] text-zinc-300 hover:border-amber-500/40 hover:text-white transition-colors cursor-pointer backdrop-blur-sm"
             >
+              <Github className="h-3.5 w-3.5 text-amber-400" />
               <span>GitHub</span>
               <ArrowUpRight className="h-3 w-3 text-zinc-500" />
             </a>
 
-            {/* LinkedIn Link */}
+            {/* Instagram Link */}
             <a
-              href="https://linkedin.com"
+              href="https://instagram.com/okayopek"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex min-h-[42px] items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-4 font-mono text-[11px] text-zinc-300 hover:border-amber-500/40 hover:text-white transition-colors cursor-pointer backdrop-blur-sm"
             >
-              <span>LinkedIn</span>
+              <Instagram className="h-3.5 w-3.5 text-amber-400" />
+              <span>@okayopek</span>
               <ArrowUpRight className="h-3 w-3 text-zinc-500" />
             </a>
           </div>

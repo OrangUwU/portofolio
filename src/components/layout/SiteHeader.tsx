@@ -2,11 +2,18 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { CopyEmailPill } from "@/components/interactive/CopyEmailPill";
-import { Menu, X, ArrowUpRight } from "lucide-react";
+import { Menu, X, ArrowUpRight, Volume2, VolumeX, Github, Instagram } from "lucide-react";
+import { soundManager } from "@/lib/soundManager";
 
 export function SiteHeader({ onContactOpen }: { onContactOpen?: () => void }) {
   const [time, setTime] = useState<string>("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+
+  useEffect(() => {
+    setIsMuted(soundManager.getMuted());
+    return soundManager.subscribe((muted) => setIsMuted(muted));
+  }, []);
 
   useEffect(() => {
     const updateTime = () => {
@@ -79,8 +86,8 @@ export function SiteHeader({ onContactOpen }: { onContactOpen?: () => void }) {
             ))}
           </nav>
 
-          {/* Right Status & Clock Actions */}
-          <div className="flex items-center gap-3">
+          {/* Right Status, Audio Toggle & Clock Actions */}
+          <div className="flex items-center gap-2.5 sm:gap-3">
             {/* Live Clock HUD */}
             <div className="hidden lg:flex items-center gap-2 border-r border-white/10 pr-3 font-mono text-[11px] text-zinc-400">
               <span className="relative flex h-2 w-2">
@@ -94,6 +101,22 @@ export function SiteHeader({ onContactOpen }: { onContactOpen?: () => void }) {
                 UTC+7 · Banyuwangi
               </span>
             </div>
+
+            {/* Minimalist Audio Mute/Unmute Toggle Button */}
+            <button
+              type="button"
+              onClick={() => soundManager.toggleMute()}
+              aria-label={isMuted ? "Unmute sound effects" : "Mute sound effects"}
+              aria-pressed={!isMuted}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-zinc-300 hover:border-amber-500/40 hover:text-amber-400 transition-colors cursor-pointer touch-manipulation"
+              title={isMuted ? "Sound: Off (Click to enable)" : "Sound: On (Click to mute)"}
+            >
+              {isMuted ? (
+                <VolumeX className="h-4 w-4 text-zinc-500" />
+              ) : (
+                <Volume2 className="h-4 w-4 text-amber-400" />
+              )}
+            </button>
 
             {/* Direct Contact Button / Email Pill */}
             <div className="hidden sm:flex items-center gap-2">
@@ -145,7 +168,28 @@ export function SiteHeader({ onContactOpen }: { onContactOpen?: () => void }) {
               </a>
             ))}
 
-            <div className="mt-2 pt-3 border-t border-white/10 flex flex-col gap-2.5">
+            <div className="mt-1 grid grid-cols-2 gap-2">
+              <a
+                href="https://github.com/OrangUwU"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] py-2.5 font-mono text-[11px] text-zinc-200 hover:border-amber-500/40"
+              >
+                <Github className="h-3.5 w-3.5 text-amber-400" />
+                <span>@OrangUwU</span>
+              </a>
+              <a
+                href="https://instagram.com/okayopek"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] py-2.5 font-mono text-[11px] text-zinc-200 hover:border-amber-500/40"
+              >
+                <Instagram className="h-3.5 w-3.5 text-amber-400" />
+                <span>@okayopek</span>
+              </a>
+            </div>
+
+            <div className="mt-1 pt-3 border-t border-white/10 flex flex-col gap-2.5">
               <div className="flex items-center justify-between font-mono text-[11px] text-zinc-400">
                 <span className="flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />

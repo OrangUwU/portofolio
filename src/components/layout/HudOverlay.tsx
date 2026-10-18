@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
+import { soundManager } from "@/lib/soundManager";
 
 function formatJakartaTime(d: Date) {
   return d.toLocaleTimeString("en-GB", {
@@ -16,7 +17,12 @@ function formatJakartaTime(d: Date) {
 export function HudOverlay() {
   const [time, setTime] = useState<string>("--:--:--");
   const [depth, setDepth] = useState(0);
-  const [soundOn, setSoundOn] = useState(false);
+  const [soundOn, setSoundOn] = useState(true);
+
+  useEffect(() => {
+    setSoundOn(!soundManager.getMuted());
+    return soundManager.subscribe((muted) => setSoundOn(!muted));
+  }, []);
 
   // UTC+7 live clock
   useEffect(() => {
@@ -83,12 +89,12 @@ export function HudOverlay() {
           <span className="hidden font-mono text-[10px] tracking-[0.14em] text-zinc-500 sm:inline">SYS.SOUND</span>
           <button
             type="button"
-            onClick={() => setSoundOn((v) => !v)}
+            onClick={() => soundManager.toggleMute()}
             aria-label={soundOn ? "Mute sound" : "Enable sound"}
             aria-pressed={soundOn}
-            className="pointer-events-auto inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-zinc-300 backdrop-blur transition hover:border-amber-500/40 hover:text-amber-400"
+            className="pointer-events-auto inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-zinc-300 backdrop-blur transition hover:border-amber-500/40 hover:text-amber-400 cursor-pointer"
           >
-            {soundOn ? <Volume2 className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}
+            {soundOn ? <Volume2 className="h-3.5 w-3.5 text-amber-400" /> : <VolumeX className="h-3.5 w-3.5" />}
           </button>
         </div>
       </div>

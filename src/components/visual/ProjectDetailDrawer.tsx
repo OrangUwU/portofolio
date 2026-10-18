@@ -264,7 +264,8 @@ export function ProjectDetailDrawer({
                   {project.stack.map((tech) => (
                     <span
                       key={tech}
-                      className="rounded-full border border-amber-500/20 bg-amber-500/[0.05] px-3 py-1 font-mono text-[11px] tracking-wide text-amber-200"
+                      data-sfx="badge"
+                      className="rounded-full border border-amber-500/20 bg-amber-500/[0.05] px-3 py-1 font-mono text-[11px] tracking-wide text-amber-200 hover:border-amber-400 transition-colors"
                     >
                       {tech}
                     </span>
@@ -275,24 +276,37 @@ export function ProjectDetailDrawer({
 
             {/* Sticky Action Footer */}
             <div className="sticky bottom-0 z-20 border-t border-white/10 bg-[#07080D]/95 px-6 py-4 backdrop-blur-xl">
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="min-h-[44px] flex-1 rounded-full border border-white/15 bg-white/[0.04] px-5 font-mono text-[12px] uppercase tracking-wider text-zinc-300 transition-all duration-200 hover:border-amber-400/50 hover:bg-white/[0.08] hover:text-white active:scale-[0.98] transform-gpu cursor-pointer"
+                  className="min-h-[42px] rounded-full border border-white/15 bg-white/[0.04] px-5 font-mono text-[11.5px] uppercase tracking-wider text-zinc-300 transition-all duration-200 hover:border-amber-400/50 hover:bg-white/[0.08] hover:text-white active:scale-[0.98] transform-gpu cursor-pointer"
                 >
                   Close
                 </button>
 
+                {project.codeUrl && (
+                  <a
+                    href={project.codeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-[42px] flex-1 items-center justify-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/10 px-4 font-mono text-[11.5px] font-semibold text-amber-300 transition-all duration-200 hover:border-amber-400 hover:bg-amber-500/20 hover:text-white active:scale-[0.98]"
+                  >
+                    <span>GitHub Repo</span>
+                    <ArrowUpRight className="h-3.5 w-3.5" />
+                  </a>
+                )}
+
                 <a
                   href={
                     project.caseStudy?.externalUrl ||
+                    project.codeUrl ||
                     project.links?.[0]?.href ||
                     "#"
                   }
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full bg-white px-5 text-[13px] font-semibold text-black transition-all duration-200 hover:bg-zinc-200 active:scale-[0.98] transform-gpu focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                  className="group inline-flex min-h-[42px] flex-1 items-center justify-center gap-2 rounded-full bg-white px-5 text-[12.5px] font-semibold text-black transition-all duration-200 hover:bg-zinc-200 active:scale-[0.98] transform-gpu focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                 >
                   <span>Explore</span>
                   <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-black transition-transform duration-300 group-hover:translate-x-[1px] group-hover:-translate-y-[1px]">

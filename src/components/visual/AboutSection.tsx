@@ -1,26 +1,49 @@
 "use client";
 import Image from "next/image";
 import { SectionReveal } from "./SectionReveal";
-import { SKILLS } from "@/content/about";
-import { MapPin, ShieldCheck, Sparkles } from "lucide-react";
+import { ABOUT_ME, SKILLS } from "@/content/about";
+import { MapPin, ShieldCheck, Sparkles, Terminal } from "lucide-react";
 
 export function AboutSection() {
   const capabilities = [
-    { idx: "01", name: "Full-Stack & Mobile Engineering", desc: "React Native, Expo, and modular client architectures" },
-    { idx: "02", name: "Geographic Information Systems (GIS)", desc: "Interactive Mapbox GL maps, spatial layers, and GPS tracking" },
-    { idx: "03", name: "Real-time Telemetry & WebSockets", desc: "Sub-second event dispatch with Socket.io & Express" },
-    { idx: "04", name: "DVRP Logistics & Dynamic Routing", desc: "Human-as-a-Sensor routing optimization with WhatsApp Webhook" },
-    { idx: "05", name: "Empirical Research & Statistical Data", desc: "Likert scale questionnaire design & quantitative behavioral analysis" },
-    { idx: "06", name: "Brand Identity & Tactical Apparel", desc: "Vector graphics, merrowed patches, and physical workshirt production" },
+    {
+      idx: "01",
+      name: "Mobile Engineering",
+      desc: "React Native & Expo modular client architectures with offline-first resilience",
+    },
+    {
+      idx: "02",
+      name: "Spatial / GIS Systems",
+      desc: "Interactive Mapbox GL layers, real-time GPS telemetry & Geospatial Routing",
+    },
+    {
+      idx: "03",
+      name: "Backend & Real-Time Core",
+      desc: "Node.js, Express.js, Socket.io WebSockets & lightweight SQLite persistence",
+    },
+    {
+      idx: "04",
+      name: "DVRP Logistics & Webhooks",
+      desc: "Human-as-a-Sensor dynamic vehicle routing with WhatsApp Cloud API",
+    },
+    {
+      idx: "05",
+      name: "Empirical Data Research",
+      desc: "Likert scale questionnaire design & quantitative behavioral modeling",
+    },
+    {
+      idx: "06",
+      name: "Brand Identity & Design",
+      desc: "Figma UI/UX prototyping, vector emblem artwork & tactical apparel",
+    },
   ];
 
-  const allStack = [
-    ...SKILLS.frontend,
-    ...SKILLS.backend,
-    ...SKILLS.database,
-    ...SKILLS.tools_and_gis,
-    "Dynamic Routing (DVRP)",
-    "Likert Analysis",
+  const categorizedStack = [
+    { category: "Mobile", items: SKILLS.mobile },
+    { category: "Spatial / GIS", items: SKILLS.spatial_gis },
+    { category: "Backend", items: SKILLS.backend },
+    { category: "Languages", items: SKILLS.languages },
+    { category: "Tools", items: SKILLS.tools },
   ];
 
   return (
@@ -36,11 +59,19 @@ export function AboutSection() {
           <span>About &amp; Profile</span>
         </div>
 
-        {/* Editorial Statement */}
-        <div className="mt-6 max-w-[820px]">
-          <h2 className="font-sans text-[30px] sm:text-[42px] md:text-[50px] font-black tracking-[-0.03em] text-white leading-[1.12]">
+        {/* Editorial Statement + Vibecoder Tagline */}
+        <div className="mt-6 max-w-[840px]">
+          <h2 className="font-sans text-[28px] sm:text-[42px] md:text-[50px] font-black tracking-[-0.03em] text-white leading-[1.12]">
             I build software and spatial architectures that solve tangible problems — not just hypothetical prototypes.
           </h2>
+
+          {/* Synced GitHub Tech Engineer / Vibecoder Bio Callout */}
+          <div className="mt-5 flex items-start gap-3 rounded-2xl border border-amber-500/25 bg-amber-500/[0.04] px-4 py-3.5 backdrop-blur-md">
+            <Terminal className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />
+            <p className="font-mono text-[12px] sm:text-[13px] leading-relaxed text-[#fef08a]">
+              &ldquo;{ABOUT_ME.tagline}&rdquo;
+            </p>
+          </div>
         </div>
       </SectionReveal>
 
@@ -55,18 +86,24 @@ export function AboutSection() {
             Saya siswa di <strong className="text-white font-semibold">SMAN 1 Giri (XI-2 Arcanova)</strong> yang berdomisili di Banyuwangi, Jawa Timur. Fokus utama saya terletak di persimpangan antara rekayasa perangkat lunak mobile, GIS real-time, dan riset data kuantitatif.
           </p>
           <p>
-            Melalui proyek <strong className="text-white font-semibold">IJEN-CARE</strong> untuk kompetisi OPSI &amp; IMPACT 2026, saya merancang ekosistem ride-hailing geowisata di kawasan Kawah Ijen dengan Mapbox GL dan Socket.io. Bukan sekadar kode antarmuka, tetapi memvalidasi langsung kebutuhan para stakeholder dan puluhan driver lokal.
+            Melalui proyek <strong className="text-white font-semibold">IJEN-CARE</strong> untuk kompetisi OPSI &amp; IMPACT 2026, saya merancang ekosistem ride-hailing geowisata di kawasan Kawah Ijen dengan Mapbox GL, Express.js, Socket.io, dan SQLite. Bukan sekadar kode antarmuka, tetapi memvalidasi langsung kebutuhan para stakeholder dan puluhan driver lokal.
           </p>
           <p>
-            Di ranah sistem cerdas, saya mengeksplorasi konsep <strong className="text-white font-semibold">Human-as-a-Sensor</strong> dalam sistem Smart-Node Logistics (IEFC ITB), menghubungkan Webhook WhatsApp dengan algoritma DVRP (Dynamic Vehicle Routing Problem). Di sisi akademis, saya menyusun instrumen survei skala Likert empiris untuk analisis perilaku siswa di sekolah.
+            Di ranah sistem cerdas, saya mengeksplorasi konsep <strong className="text-white font-semibold">Human-as-a-Sensor</strong> dalam sistem Smart-Node Logistics (<code className="font-mono text-[13px] text-amber-300">smartwastelogistics</code>), menghubungkan Webhook WhatsApp dengan algoritma Geospatial Routing DVRP. Di sisi akademis, saya menyusun instrumen survei skala Likert empiris untuk analisis perilaku siswa di sekolah.
           </p>
 
           <div className="pt-4 flex flex-wrap items-center gap-3 font-mono text-[11px]">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/20 bg-amber-500/[0.05] px-3.5 py-1.5 text-amber-300">
+            <span
+              data-sfx="badge"
+              className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/20 bg-amber-500/[0.05] px-3.5 py-1.5 text-amber-300"
+            >
               <Sparkles className="h-3 w-3 text-amber-400" />
-              Focus: Geotourism &amp; Spatial Logistics
+              Focus: Geotourism &amp; Spatial Systems
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/20 bg-amber-500/[0.05] px-3.5 py-1.5 text-[#fef08a]">
+            <span
+              data-sfx="badge"
+              className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/20 bg-amber-500/[0.05] px-3.5 py-1.5 text-[#fef08a]"
+            >
               <ShieldCheck className="h-3 w-3 text-amber-400" />
               OPSI &amp; IMPACT 2026 Ready
             </span>
@@ -79,7 +116,7 @@ export function AboutSection() {
             {/* Facts Table ala Poggufanz (Warm Amber Glass) */}
             <div className="rounded-2xl border border-amber-500/20 bg-[#08090F]/80 p-5 backdrop-blur-md shadow-[0_0_30px_rgba(245,158,11,0.06)]">
               <p className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-amber-400/90 mb-4 pb-2 border-b border-white/10">
-                // System Profile
+                // System Profile · @OrangUwU
               </p>
               <dl className="space-y-3 font-mono text-[11.5px]">
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-1 border-b border-white/5 pb-2">
@@ -95,8 +132,8 @@ export function AboutSection() {
                   <dd className="text-zinc-200 text-right">OPSI &amp; IMPACT 2026 · IEFC ITB</dd>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-1 border-b border-white/5 pb-2">
-                  <dt className="text-zinc-500">Languages</dt>
-                  <dd className="text-zinc-200 text-right">Indonesian (Native) · English</dd>
+                  <dt className="text-zinc-500">GitHub / IG</dt>
+                  <dd className="text-zinc-200 text-right">@OrangUwU · @okayopek</dd>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-1 pb-1">
                   <dt className="text-zinc-500">Coordinates</dt>
@@ -125,7 +162,7 @@ export function AboutSection() {
         </SectionReveal>
       </div>
 
-      {/* Capabilities & Arsenal Bottom Sub-grid */}
+      {/* Capabilities & Synced GitHub Tech Stack Bottom Sub-grid */}
       <SectionReveal
         delay={0.2}
         className="mt-14 pt-10 border-t border-white/10 grid grid-cols-1 lg:grid-cols-12 gap-8"
@@ -139,6 +176,7 @@ export function AboutSection() {
             {capabilities.map((cap) => (
               <li
                 key={cap.idx}
+                data-sfx="card"
                 className="group flex flex-col justify-between rounded-xl border border-white/10 bg-white/[0.02] p-3.5 hover:border-amber-500/35 hover:bg-amber-500/[0.03] transition-all"
               >
                 <div>
@@ -157,26 +195,39 @@ export function AboutSection() {
           </ul>
         </div>
 
-        {/* Stack Chips (Span 5) */}
+        {/* Categorized GitHub Tech Stack Chips (Span 5) */}
         <div className="lg:col-span-5 flex flex-col justify-between">
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-zinc-400 mb-5">
-              // Technical Arsenal &amp; Tools
+              // Technical Arsenal &amp; Tools (GitHub Sync)
             </p>
-            <div className="flex flex-wrap gap-1.5">
-              {allStack.map((tech) => (
-                <span
-                  key={tech}
-                  className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 font-mono text-[11px] text-zinc-300 hover:border-amber-500/40 hover:text-amber-200 transition-colors"
+            <div className="space-y-3.5">
+              {categorizedStack.map((group) => (
+                <div
+                  key={group.category}
+                  className="rounded-xl border border-white/[0.07] bg-[#07080D]/80 p-3"
                 >
-                  {tech}
-                </span>
+                  <span className="block font-mono text-[9.5px] uppercase tracking-[0.18em] text-amber-400/90 mb-2">
+                    {group.category}
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {group.items.map((tech) => (
+                      <span
+                        key={tech}
+                        data-sfx="badge"
+                        className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 font-mono text-[11px] text-zinc-200 hover:border-amber-500/50 hover:bg-amber-500/10 hover:text-[#fef08a] transition-colors cursor-default"
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
 
           {/* Location coordinate footer */}
-          <div className="mt-8 rounded-xl border border-amber-500/15 bg-black/50 p-4 font-mono text-[11px] text-zinc-500 flex items-center justify-between">
+          <div className="mt-6 rounded-xl border border-amber-500/15 bg-black/50 p-4 font-mono text-[11px] text-zinc-500 flex items-center justify-between">
             <span className="flex items-center gap-1.5 text-zinc-300">
               <MapPin className="h-3.5 w-3.5 text-amber-400" />
               Origin: East Java, Indonesia

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { soundManager } from "@/lib/soundManager";
 
 interface QuantumWarpTransitProps {
   isActive: boolean;
@@ -29,77 +30,6 @@ const STAR_PALETTE = [
   "#ffffff", // Pure starlight
   "#bae6fd", // Relativistic blueshift highlight
 ];
-
-// Procedural Web Audio API Spatial Whoosh & Wormhole Drone (100Hz -> 1600Hz -> 200Hz)
-function playQuantumWarpWhoosh() {
-  try {
-    const AudioCtx =
-      window.AudioContext ||
-      (window as unknown as { webkitAudioContext: typeof AudioContext })
-        .webkitAudioContext;
-    if (!AudioCtx) return null;
-
-    const ctx = new AudioCtx();
-    const duration = 2.0;
-    const now = ctx.currentTime;
-
-    // 1. White Noise Buffer for Relativistic Wind / Spatial Whoosh
-    const bufferSize = Math.floor(ctx.sampleRate * duration);
-    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const output = noiseBuffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      output[i] = Math.random() * 2 - 1;
-    }
-
-    const whiteNoise = ctx.createBufferSource();
-    whiteNoise.buffer = noiseBuffer;
-
-    // Biquad Bandpass Filter sweeping 100Hz -> 1600Hz -> 200Hz
-    const bandpass = ctx.createBiquadFilter();
-    bandpass.type = "bandpass";
-    bandpass.Q.setValueAtTime(2.6, now);
-    bandpass.frequency.setValueAtTime(100, now);
-    bandpass.frequency.exponentialRampToValueAtTime(1600, now + 0.88);
-    bandpass.frequency.exponentialRampToValueAtTime(200, now + duration);
-
-    const noiseGain = ctx.createGain();
-    noiseGain.gain.setValueAtTime(0.001, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.26, now + 0.68);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-
-    whiteNoise.connect(bandpass);
-    bandpass.connect(noiseGain);
-    noiseGain.connect(ctx.destination);
-
-    // 2. Deep Gravitational Wormhole Sub-Bass Drone Swell
-    const osc = ctx.createOscillator();
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(50, now);
-    osc.frequency.exponentialRampToValueAtTime(128, now + 0.82);
-    osc.frequency.exponentialRampToValueAtTime(36, now + duration);
-
-    const oscGain = ctx.createGain();
-    oscGain.gain.setValueAtTime(0.001, now);
-    oscGain.gain.exponentialRampToValueAtTime(0.2, now + 0.65);
-    oscGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-
-    osc.connect(oscGain);
-    oscGain.connect(ctx.destination);
-
-    whiteNoise.start(now);
-    osc.start(now);
-    whiteNoise.stop(now + duration);
-    osc.stop(now + duration);
-
-    setTimeout(() => {
-      ctx.close().catch(() => {});
-    }, (duration + 0.25) * 1000);
-
-    return ctx;
-  } catch {
-    return null;
-  }
-}
 
 export function QuantumWarpTransit({
   isActive,
@@ -129,7 +59,7 @@ export function QuantumWarpTransit({
   useEffect(() => {
     if (!isActive) return;
 
-    const audioCtx = playQuantumWarpWhoosh();
+    soundManager.playQuantumWarpWhoosh();
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -400,9 +330,6 @@ export function QuantumWarpTransit({
     return () => {
       cancelAnimationFrame(rafId);
       window.removeEventListener("resize", resize);
-      if (audioCtx && audioCtx.state !== "closed") {
-        audioCtx.close().catch(() => {});
-      }
     };
   }, [isActive, onComplete]);
 

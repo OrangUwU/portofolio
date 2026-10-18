@@ -60,7 +60,7 @@ export const projects: Project[] = [
     summary: "Aplikasi ride-hailing geowisata real-time untuk wilayah Kawah Ijen & Banyuwangi.",
     description:
       "Aplikasi ride-hailing geowisata real-time untuk wilayah Banyuwangi. Melibatkan wawancara stakeholder pariwisata lokal untuk membangun ekosistem digital yang tepat sasaran.",
-    stack: ["React Native", "Expo", "Mapbox GL", "Node.js Express", "Socket.io", "SQLite"],
+    stack: ["React Native", "Expo", "Mapbox GL", "Express.js", "Socket.io", "SQLite"],
     highlight: "Sistem tracking real-time",
     highlights: ["Sistem tracking real-time", "Integrasi peta interaktif", "Riset stakeholder empiris"],
     role: "Lead Developer & Researcher",
@@ -68,9 +68,9 @@ export const projects: Project[] = [
     image: "/ijen-care-preview.jpg",
     status: "Active · Live Case",
     signal: "30+ Drivers Onboarded · <2s Realtime Latency",
-    codeUrl: "https://github.com/achmadtaufiqurrachman",
+    codeUrl: "https://github.com/OrangUwU/IJEN-CARE",
     demoUrl: "#",
-    links: [{ label: "Case Study", href: "#" }],
+    links: [{ label: "GitHub Repo", href: "https://github.com/OrangUwU/IJEN-CARE" }],
     caseStudy: {
       role: "Lead Developer & Researcher — OPSI & IMPACT 2026",
       timeline: "Aug 2025 — Feb 2026 (6 bulan)",
@@ -79,8 +79,8 @@ export const projects: Project[] = [
       solution:
         "Membangun ride-hailing geotourism dengan live tracking Mapbox GL, order flow realtime Socket.io, dan dashboard monitoring trip. Riset OPSI & IMPACT jadi fondasi validasi stakeholder.",
       metrics: ["30+ driver lokal ter-onboarding (simulasi)", "Order flow < 2s latency (realtime)", "80+ responden wisatawan & pelaku wisata"],
-      deliverables: ["Mobile App (React Native + Expo)", "Backend API (Express + SQLite)", "Realtime Service (Socket.io)", "Laporan OPSI & Poster IMPACT 2026"],
-      externalUrl: "#",
+      deliverables: ["Mobile App (React Native + Expo)", "Backend API (Express.js + SQLite)", "Realtime Service (Socket.io)", "Laporan OPSI & Poster IMPACT 2026"],
+      externalUrl: "https://github.com/OrangUwU/IJEN-CARE",
     },
   },
   {
@@ -91,7 +91,7 @@ export const projects: Project[] = [
     summary: "Sistem logistik pintar berbasis QR Smart Bin, WhatsApp Webhook VPS & optimasi rute DVRP.",
     description:
       "Sistem logistik pintar (Human-as-a-Sensor) untuk DLH Banyuwangi: warga scan QR code pada smart bin klaster 3-rumah, auto-redirect ke WhatsApp ('penuh 1', 'penuh 2', 'penuh 3'), diproses oleh Webhook di VPS, lalu masuk real-time ke dashboard web untuk optimasi rute armada truk sampah (DVRP).",
-    stack: ["TypeScript", "Node.js VPS", "Mapbox GL", "WhatsApp Cloud API", "QR Smart Bin", "DVRP 2-Opt"],
+    stack: ["TypeScript", "Node.js", "Mapbox GL", "Geospatial Routing", "WhatsApp Cloud API", "DVRP 2-Opt"],
     highlight: "Scan QR Bin → Auto WA ('penuh 1/2/3') → Webhook VPS → Live DVRP",
     highlights: [
       "Scan Smart Bin (QR Code) klaster 3-rumah",
@@ -104,9 +104,9 @@ export const projects: Project[] = [
     image: "/smart-node-preview.png",
     status: "Active · Live Sync",
     signal: "QR Smart Bin → WA Webhook VPS · -21.5% DVRP Route",
-    codeUrl: "https://github.com/achmadtaufiqurrachman",
+    codeUrl: "https://github.com/OrangUwU/smartwastelogistics",
     demoUrl: "https://ijencare.my.id",
-    links: [{ label: "Case Study", href: "#" }],
+    links: [{ label: "GitHub Repo", href: "https://github.com/OrangUwU/smartwastelogistics" }],
     caseStudy: {
       role: "System Architect — IEFC ITB Prototype (DLH Banyuwangi)",
       timeline: "2025",

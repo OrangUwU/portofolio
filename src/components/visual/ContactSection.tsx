@@ -8,7 +8,7 @@ import {
   MessageSquare,
   MapPin,
   ArrowUp,
-  Linkedin,
+  Instagram,
 } from "lucide-react";
 import { SectionReveal } from "./SectionReveal";
 import { CopyEmailPill } from "@/components/interactive/CopyEmailPill";
@@ -338,6 +338,12 @@ export function ContactSection({
                 onMouseLeave={() => {
                   isHoveringPortalRef.current = false;
                 }}
+                onTouchStart={() => {
+                  isHoveringPortalRef.current = true;
+                }}
+                onTouchEnd={() => {
+                  isHoveringPortalRef.current = false;
+                }}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
@@ -347,10 +353,10 @@ export function ContactSection({
                   }
                 }}
                 aria-label="Trigger Quantum Warp — Return to Origin"
-                className="group relative flex flex-col items-center justify-center w-full max-w-[440px] rounded-2xl border border-amber-500/25 bg-[#04050A]/90 p-5 backdrop-blur-md hover:border-amber-400/60 transition-all duration-300 cursor-pointer overflow-hidden shadow-[0_0_55px_rgba(0,0,0,0.85),inset_0_0_40px_rgba(245,158,11,0.08)]"
+                className="group relative flex flex-col items-center justify-center w-full max-w-[440px] rounded-2xl border border-amber-500/25 bg-[#04050A]/90 p-4 sm:p-5 backdrop-blur-md hover:border-amber-400/60 active:scale-[0.99] transition-all duration-300 cursor-pointer overflow-hidden shadow-[0_0_55px_rgba(0,0,0,0.85),inset_0_0_40px_rgba(245,158,11,0.08)] touch-manipulation"
               >
                 {/* Top HUD Corner Telemetry */}
-                <div className="w-full flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.22em] text-zinc-500 mb-1">
+                <div className="w-full flex items-center justify-between font-mono text-[8.5px] sm:text-[9px] uppercase tracking-[0.2em] text-zinc-500 mb-1">
                   <span className="text-amber-400/80">5D HYPERCUBE GATE</span>
                   <span>08°12&apos;S 114°22&apos;E</span>
                 </div>
@@ -358,17 +364,17 @@ export function ContactSection({
                 <canvas
                   ref={galaxyCanvasRef}
                   style={{ mixBlendMode: "screen" }}
-                  className="h-[200px] w-[340px] sm:h-[220px] sm:w-[390px] transition-transform duration-500 group-hover:scale-105"
+                  className="w-full max-w-[390px] aspect-[460/270] h-auto transition-transform duration-500 group-hover:scale-105"
                 />
 
-                <div className="mt-2 flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.26em] text-amber-300 group-hover:text-white transition-colors">
+                <div className="mt-2 flex items-center gap-2 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.22em] sm:tracking-[0.26em] text-amber-300 group-hover:text-white transition-colors">
                   <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b] animate-ping" />
                   <span>RETURN TO ORIGIN</span>
                   <span className="text-amber-400 group-hover:text-white group-hover:translate-x-1 transition-transform">
                     →
                   </span>
                 </div>
-                <span className="mt-1 font-mono text-[9px] uppercase tracking-[0.22em] text-zinc-500 group-hover:text-amber-200/70 transition-colors">
+                <span className="mt-1 font-mono text-[8.5px] sm:text-[9px] uppercase tracking-[0.18em] sm:tracking-[0.22em] text-zinc-500 group-hover:text-amber-200/70 transition-colors text-center">
                   TESSERACT FOLD // SINGULARITY TRANSIT
                 </span>
               </div>
@@ -415,7 +421,7 @@ export function ContactSection({
 
           {/* Row 3: GitHub */}
           <a
-            href="https://github.com/achmadtaufiqurrachman"
+            href="https://github.com/OrangUwU"
             target="_blank"
             rel="noopener noreferrer"
             className="group flex flex-col sm:flex-row sm:items-center sm:justify-between py-5 gap-3 transition-colors hover:bg-amber-500/[0.03] px-2 sm:px-4 rounded-lg"
@@ -425,24 +431,24 @@ export function ContactSection({
             </span>
             <span className="font-mono text-[13px] sm:text-[14px] text-zinc-200 group-hover:text-white transition-colors flex items-center gap-2">
               <Github className="h-3.5 w-3.5 text-amber-400/80" />
-              @achmadtaufiqurrachman
+              @OrangUwU
             </span>
             <ArrowUpRight className="hidden sm:block h-4 w-4 text-zinc-600 group-hover:text-amber-400 transition-colors group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </a>
 
-          {/* Row 4: LinkedIn */}
+          {/* Row 4: Instagram */}
           <a
-            href="https://linkedin.com/in/achmadtaufiqurrachman"
+            href="https://instagram.com/okayopek"
             target="_blank"
             rel="noopener noreferrer"
             className="group flex flex-col sm:flex-row sm:items-center sm:justify-between py-5 gap-3 transition-colors hover:bg-amber-500/[0.03] px-2 sm:px-4 rounded-lg"
           >
             <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-zinc-500 w-32">
-              LinkedIn
+              Instagram
             </span>
             <span className="font-mono text-[13px] sm:text-[14px] text-zinc-200 group-hover:text-white transition-colors flex items-center gap-2">
-              <Linkedin className="h-3.5 w-3.5 text-amber-400/80" />
-              Achmad Taufiqur Rachman
+              <Instagram className="h-3.5 w-3.5 text-amber-400/80" />
+              @okayopek
             </span>
             <ArrowUpRight className="hidden sm:block h-4 w-4 text-zinc-600 group-hover:text-amber-400 transition-colors group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </a>
@@ -491,15 +497,38 @@ export function ContactSection({
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={triggerQuantumWarp}
-          className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.25em] text-amber-400 hover:text-white transition-colors cursor-pointer self-start sm:self-auto"
-        >
-          <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-ping" />
-          <span>RETURN TO ORIGIN</span>
-          <ArrowUp className="h-3.5 w-3.5 text-amber-400 transition-transform group-hover:-translate-y-0.5" />
-        </button>
+        <div className="flex flex-wrap items-center gap-4">
+          <a
+            href="https://github.com/OrangUwU"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub @OrangUwU"
+            className="inline-flex items-center gap-1.5 text-zinc-400 hover:text-amber-300 transition-colors"
+          >
+            <Github className="h-3.5 w-3.5" />
+            <span>@OrangUwU</span>
+          </a>
+          <a
+            href="https://instagram.com/okayopek"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram @okayopek"
+            className="inline-flex items-center gap-1.5 text-zinc-400 hover:text-amber-300 transition-colors"
+          >
+            <Instagram className="h-3.5 w-3.5" />
+            <span>@okayopek</span>
+          </a>
+
+          <button
+            type="button"
+            onClick={triggerQuantumWarp}
+            className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.25em] text-amber-400 hover:text-white transition-colors cursor-pointer"
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-ping" />
+            <span>RETURN TO ORIGIN</span>
+            <ArrowUp className="h-3.5 w-3.5 text-amber-400 transition-transform group-hover:-translate-y-0.5" />
+          </button>
+        </div>
       </footer>
     </section>
   );

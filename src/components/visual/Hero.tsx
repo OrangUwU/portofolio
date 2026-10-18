@@ -127,7 +127,7 @@ export function Hero({ onContactOpen }: { onContactOpen?: () => void }) {
               )}
 
               <a
-                href="https://github.com/achmadtaufiqurrachman"
+                href="https://github.com/OrangUwU"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-white/10 bg-transparent px-4 py-2 font-mono text-[12px] text-zinc-400 hover:text-white hover:border-white/20 transition-colors"
