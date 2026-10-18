@@ -17,6 +17,11 @@ interface WarpStar {
   size: number;
 }
 
+interface TesseractGate {
+  z: number;
+  rotOffset: number;
+}
+
 const STAR_PALETTE = [
   "#fffbeb", // Brilliant photonic white-gold
   "#fef08a", // Warm Doppler yellow-gold
@@ -120,7 +125,7 @@ export function QuantumWarpTransit({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [isActive, handleSkip]);
 
-  // Full-Screen 60fps 3D Hyperspace Starfield Jump with Chromatic Aberration & Wormhole Lensing
+  // Full-Screen 60fps 3D Tesseract Hyper-Corridor & Relativistic Starfield Jump
   useEffect(() => {
     if (!isActive) return;
 
@@ -139,17 +144,16 @@ export function QuantumWarpTransit({
     resize();
     window.addEventListener("resize", resize);
 
-    const STAR_COUNT = 850;
-    const spread = Math.max(window.innerWidth, window.innerHeight) * 1.65;
-    const maxDepth = 1400;
+    const STAR_COUNT = 950;
+    const spread = Math.max(window.innerWidth, window.innerHeight) * 1.75;
+    const maxDepth = 1500;
 
     const stars: WarpStar[] = Array.from({ length: STAR_COUNT }, (_, i) => {
       const z = Math.random() * maxDepth + 1;
-      // Avoid spawning directly inside the central pinhole so the wormhole throat stays crisp
       let x = (Math.random() - 0.5) * spread * 2;
       let y = (Math.random() - 0.5) * spread * 2;
-      if (Math.hypot(x, y) < 35) {
-        x += 55;
+      if (Math.hypot(x, y) < 42) {
+        x += 65;
       }
       return {
         x,
@@ -157,13 +161,20 @@ export function QuantumWarpTransit({
         z,
         pz: z,
         color: STAR_PALETTE[i % STAR_PALETTE.length],
-        size: 0.85 + Math.random() * 1.65,
+        size: 0.9 + Math.random() * 1.75,
       };
     });
 
+    // 12 Receding 3D Tesseract Wireframe Gates rushing past the camera
+    const GATE_COUNT = 12;
+    const gates: TesseractGate[] = Array.from({ length: GATE_COUNT }, (_, i) => ({
+      z: ((i + 1) / GATE_COUNT) * maxDepth,
+      rotOffset: i * 0.08,
+    }));
+
     let rafId = 0;
     const startTime = performance.now();
-    const totalDuration = 1820; // 1.82 seconds hyperspace jump
+    const totalDuration = 1900; // 1.90s cinematic hyperspace jump
     let hasScrolledToOrigin = false;
 
     const render = (now: number) => {
@@ -171,27 +182,92 @@ export function QuantumWarpTransit({
       const progress = Math.min(1, elapsed / totalDuration);
 
       // Scroll behind the warp curtain at peak velocity
-      if (progress >= 0.62 && !hasScrolledToOrigin) {
+      if (progress >= 0.6 && !hasScrolledToOrigin) {
         hasScrolledToOrigin = true;
         window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
       }
 
-      // Speed curve: accelerates from 1 to 60 (warp velocity), then decelerates smoothly
+      // Speed curve: smooth relativistic acceleration and deceleration
       const bell = Math.sin(progress * Math.PI);
-      const speed = 1.0 + Math.pow(bell, 1.3) * 59.0;
+      const speed = 1.5 + Math.pow(bell, 1.25) * 64.0;
+      const cameraRoll = progress * 0.42;
 
       const w = canvas.width;
       const h = canvas.height;
       const cx = w * 0.5;
       const cy = h * 0.5;
-      const fov = Math.min(w, h) * 0.66;
+      const fov = Math.min(w, h) * 0.68;
 
       // Motion blur trail persistence
-      ctx.fillStyle = "rgba(3, 4, 9, 0.27)";
+      ctx.fillStyle = "rgba(3, 4, 9, 0.28)";
       ctx.fillRect(0, 0, w, h);
 
-      // Wormhole gravitational lens radius
-      const lensRadius = (36 + bell * 28) * dpr;
+      // 1. Render 3D Receding Copper/Gold Tesseract Corridor Gates
+      const gateOuterSize = 360;
+      const gateInnerSize = 185;
+      const unitCorners = [
+        [-1, -1],
+        [1, -1],
+        [1, 1],
+        [-1, 1],
+      ];
+
+      for (let gi = 0; gi < GATE_COUNT; gi++) {
+        const g = gates[gi];
+        g.z -= speed * 0.88;
+        if (g.z <= 18) {
+          g.z += maxDepth;
+        }
+
+        const scale = fov / g.z;
+        const gateAlpha = Math.min(0.65, (1 - g.z / maxDepth) * 0.85) * (0.25 + bell * 0.75);
+        const angle = cameraRoll + g.rotOffset * 0.25;
+        const cosA = Math.cos(angle);
+        const sinA = Math.sin(angle);
+
+        const outerPts = unitCorners.map(([ux, uy]) => {
+          const rx = (ux * cosA - uy * sinA) * gateOuterSize;
+          const ry = (ux * sinA + uy * cosA) * gateOuterSize;
+          return { x: cx + rx * scale, y: cy + ry * scale };
+        });
+
+        const innerPts = unitCorners.map(([ux, uy]) => {
+          const rx = (ux * cosA - uy * sinA) * gateInnerSize;
+          const ry = (ux * sinA + uy * cosA) * gateInnerSize;
+          return { x: cx + rx * scale, y: cy + ry * scale };
+        });
+
+        // Outer 3D Copper Cube Frame
+        ctx.beginPath();
+        for (let c = 0; c < 4; c++) {
+          const p1 = outerPts[c];
+          const p2 = outerPts[(c + 1) % 4];
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+        }
+        ctx.strokeStyle = `rgba(217, 119, 6, ${(gateAlpha * 0.6).toFixed(3)})`;
+        ctx.lineWidth = Math.max(0.8 * dpr, 1.3 * dpr * (1 - g.z / maxDepth));
+        ctx.stroke();
+
+        // Inner 4D Tesseract Core Frame + Diagonal Hypercube Struts
+        ctx.beginPath();
+        for (let c = 0; c < 4; c++) {
+          const i1 = innerPts[c];
+          const i2 = innerPts[(c + 1) % 4];
+          const o1 = outerPts[c];
+          ctx.moveTo(i1.x, i1.y);
+          ctx.lineTo(i2.x, i2.y);
+          // 4D hypercube diagonal bridge
+          ctx.moveTo(i1.x, i1.y);
+          ctx.lineTo(o1.x, o1.y);
+        }
+        ctx.strokeStyle = `rgba(254, 240, 138, ${(gateAlpha * 0.45).toFixed(3)})`;
+        ctx.lineWidth = Math.max(0.6 * dpr, 1.0 * dpr * (1 - g.z / maxDepth));
+        ctx.stroke();
+      }
+
+      // 2. Render 950 Relativistic Light Streaks with Gravitational Lensing & Doppler Fringing
+      const lensRadius = (38 + bell * 32) * dpr;
 
       for (let i = 0; i < STAR_COUNT; i++) {
         const s = stars[i];
@@ -208,7 +284,7 @@ export function QuantumWarpTransit({
         let sx = cx + (s.x / s.z) * fov;
         let sy = cy + (s.y / s.z) * fov;
 
-        const streakZ = s.z + speed * 2.4;
+        const streakZ = s.z + speed * 2.6;
         let px = cx + (s.x / streakZ) * fov;
         let py = cy + (s.y / streakZ) * fov;
 
@@ -216,45 +292,52 @@ export function QuantumWarpTransit({
         const dx = sx - cx;
         const dy = sy - cy;
         const dist = Math.hypot(dx, dy) || 1;
-        if (dist < lensRadius * 2.6) {
-          const push = (lensRadius * lensRadius) / Math.max(dist, lensRadius * 0.65);
-          sx += (dx / dist) * push * 0.45;
-          sy += (dy / dist) * push * 0.45;
-          px += (dx / dist) * push * 0.35;
-          py += (dy / dist) * push * 0.35;
+        if (dist < lensRadius * 2.7) {
+          const push =
+            (lensRadius * lensRadius) / Math.max(dist, lensRadius * 0.65);
+          sx += (dx / dist) * push * 0.48;
+          sy += (dy / dist) * push * 0.48;
+          px += (dx / dist) * push * 0.36;
+          py += (dy / dist) * push * 0.36;
         }
 
-        const depthAlpha = Math.min(1, (1 - s.z / maxDepth) * 1.35);
-        const lw = s.size * dpr * (0.6 + (1 - s.z / maxDepth) * 1.3);
+        const depthAlpha = Math.min(1, (1 - s.z / maxDepth) * 1.4);
+        const lw = s.size * dpr * (0.65 + (1 - s.z / maxDepth) * 1.35);
 
-        // 1. Chromatic Aberration / Relativistic Doppler Fringing (at high warp velocity)
-        if (bell > 0.32 && depthAlpha > 0.25) {
-          const fringeOffset = bell * 2.4 * dpr;
+        // Relativistic Doppler Chromatic Fringing at high warp velocity
+        if (bell > 0.28 && depthAlpha > 0.22) {
+          const fringeOffset = bell * 2.6 * dpr;
           const ux = dx / dist;
           const uy = dy / dist;
 
-          // Outer Blueshifted Fringe (Cyan-Blue)
+          // Outer Blueshifted Fringe
           ctx.beginPath();
           ctx.moveTo(px + ux * fringeOffset, py + uy * fringeOffset);
-          ctx.lineTo(sx + ux * fringeOffset * 1.5, sy + uy * fringeOffset * 1.5);
-          ctx.strokeStyle = "rgba(56, 189, 248, 0.42)";
+          ctx.lineTo(
+            sx + ux * fringeOffset * 1.5,
+            sy + uy * fringeOffset * 1.5
+          );
+          ctx.strokeStyle = "rgba(56, 189, 248, 0.44)";
           ctx.globalAlpha = depthAlpha * 0.65;
           ctx.lineWidth = lw * 0.85;
           ctx.lineCap = "round";
           ctx.stroke();
 
-          // Inner Redshifted Fringe (Warm Amber-Red)
+          // Inner Warm Amber Fringe
           ctx.beginPath();
           ctx.moveTo(px - ux * fringeOffset, py - uy * fringeOffset);
-          ctx.lineTo(sx - ux * fringeOffset * 1.4, sy - uy * fringeOffset * 1.4);
-          ctx.strokeStyle = "rgba(245, 158, 11, 0.55)";
-          ctx.globalAlpha = depthAlpha * 0.75;
+          ctx.lineTo(
+            sx - ux * fringeOffset * 1.4,
+            sy - uy * fringeOffset * 1.4
+          );
+          ctx.strokeStyle = "rgba(245, 158, 11, 0.58)";
+          ctx.globalAlpha = depthAlpha * 0.78;
           ctx.lineWidth = lw * 0.85;
           ctx.lineCap = "round";
           ctx.stroke();
         }
 
-        // 2. Primary Relativistic Light Streak
+        // Primary Relativistic Photonic Streak
         ctx.beginPath();
         ctx.moveTo(px, py);
         ctx.lineTo(sx, sy);
@@ -266,37 +349,37 @@ export function QuantumWarpTransit({
       }
       ctx.globalAlpha = 1;
 
-      // Central Wormhole Gravitational Lens Vortex
+      // 3. Central Wormhole Gravitational Lens Vortex & Einstein Photon Ring
       const vortexGrad = ctx.createRadialGradient(
         cx,
         cy,
         lensRadius * 0.15,
         cx,
         cy,
-        lensRadius * 2.1
+        lensRadius * 2.2
       );
-      vortexGrad.addColorStop(0, "rgba(0, 0, 0, 0.96)");
-      vortexGrad.addColorStop(0.38, "rgba(3, 4, 9, 0.88)");
+      vortexGrad.addColorStop(0, "rgba(0, 0, 0, 0.97)");
+      vortexGrad.addColorStop(0.38, "rgba(3, 4, 9, 0.9)");
       vortexGrad.addColorStop(
         0.52,
-        `rgba(254, 240, 138, ${(0.22 + bell * 0.35).toFixed(3)})`
+        `rgba(254, 240, 138, ${(0.26 + bell * 0.38).toFixed(3)})`
       );
       vortexGrad.addColorStop(
         0.72,
-        `rgba(245, 158, 11, ${(0.08 + bell * 0.14).toFixed(3)})`
+        `rgba(245, 158, 11, ${(0.1 + bell * 0.18).toFixed(3)})`
       );
       vortexGrad.addColorStop(1, "rgba(3, 4, 9, 0)");
 
       ctx.fillStyle = vortexGrad;
       ctx.beginPath();
-      ctx.arc(cx, cy, lensRadius * 2.1, 0, Math.PI * 2);
+      ctx.arc(cx, cy, lensRadius * 2.2, 0, Math.PI * 2);
       ctx.fill();
 
-      // Razor-thin Einstein Photon Ring around Wormhole Throat
+      // Razor-sharp Einstein Photon Ring
       ctx.beginPath();
-      ctx.arc(cx, cy, lensRadius * 0.85, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(255, 251, 235, ${(0.35 + bell * 0.5).toFixed(3)})`;
-      ctx.lineWidth = 1.4 * dpr;
+      ctx.arc(cx, cy, lensRadius * 0.86, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(255, 251, 235, ${(0.4 + bell * 0.52).toFixed(3)})`;
+      ctx.lineWidth = 1.5 * dpr;
       ctx.stroke();
 
       if (progress < 1) {
@@ -337,7 +420,7 @@ export function QuantumWarpTransit({
           aria-modal="true"
           aria-label="Transit returning to origin"
         >
-          {/* 60fps 3D Starfield Hyperspace Canvas */}
+          {/* 60fps 3D Tesseract Corridor & Starfield Hyperspace Canvas */}
           <canvas
             ref={canvasRef}
             className="pointer-events-none absolute inset-0 h-full w-full"
@@ -360,7 +443,7 @@ export function QuantumWarpTransit({
             <span>TRANSIT</span>
             <span className="h-px w-8 bg-amber-500/70" />
             <span className="text-amber-300 font-semibold">
-              RETURNING TO ORIGIN
+              RETURNING TO ORIGIN // 5D FOLD
             </span>
           </div>
         </motion.div>

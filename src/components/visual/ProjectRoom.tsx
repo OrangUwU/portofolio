@@ -18,13 +18,14 @@ import {
   Compass,
   Radio,
   Sparkles,
+  Layers,
 } from "lucide-react";
 import { projects, type Project } from "@/content/projects";
 import { ProjectDetailDrawer } from "./ProjectDetailDrawer";
 import { MediaModal } from "./MediaModal";
 import { LookbookModal } from "./LookbookModal";
 
-// Sci-fi quote & timeline metadata per project room (Poggufanz & Interstellar 5D Tesseract spec)
+// Sci-fi quote, 5D coordinates & uniform telemetry per room (ensures 100% identical height across all 5 rooms)
 const roomMeta = [
   {
     tickDate: "2026.02",
@@ -33,6 +34,28 @@ const roomMeta = [
     gravityFreq: "42.8 Hz",
     quote1: "Past the sulfur horizon,",
     quote2: "mobility becomes a coordinate in the dark.",
+    telemetryNodes: [
+      {
+        step: "01",
+        title: "Offline-First Mapbox GL",
+        desc: "Peta topografi Kawah Ijen tetap aktif di zona blank-spot sinyal.",
+      },
+      {
+        step: "02",
+        title: "5-Tap SOS Emergency",
+        desc: "Transmisi koordinat GPS darurat instan ke pos medis terdekat.",
+      },
+      {
+        step: "03",
+        title: "Toxic Gas Zone Alert",
+        desc: "Peringatan dini radius bahaya gas belerang real-time.",
+      },
+      {
+        step: "04",
+        title: "1-Click Evacuation Dispatch",
+        desc: " Koneksi langsung armada roda dua & medis darurat.",
+      },
+    ],
   },
   {
     tickDate: "2025.10",
@@ -41,6 +64,28 @@ const roomMeta = [
     gravityFreq: "38.4 Hz",
     quote1: "Human-as-a-Sensor.",
     quote2: "Every route optimized before the signal fades.",
+    telemetryNodes: [
+      {
+        step: "01",
+        title: "Scan QR Smart Bin",
+        desc: "Warga memindai QR Code unik pada tong sampah yang penuh.",
+      },
+      {
+        step: "02",
+        title: "Auto-Fill WhatsApp",
+        desc: "Membuka WhatsApp otomatis dengan format teks ID lokasi.",
+      },
+      {
+        step: "03",
+        title: "Webhook ke Server VPS",
+        desc: "Gateway meneruskan pesan ke backend & mengubah status titik.",
+      },
+      {
+        step: "04",
+        title: "Rute DVRP Real-Time",
+        desc: "Kalkulasi ulang jalur truk paling efisien secara instan.",
+      },
+    ],
   },
   {
     tickDate: "2025.03",
@@ -49,6 +94,28 @@ const roomMeta = [
     gravityFreq: "29.1 Hz",
     quote1: "Patterns emerge in unmapped corridors.",
     quote2: "Data reveals what bells cannot contain.",
+    telemetryNodes: [
+      {
+        step: "01",
+        title: "Observasi Lapangan",
+        desc: "Pemetaan titik kumpul & pola mobilitas siswa saat jam pelajaran.",
+      },
+      {
+        step: "02",
+        title: "Kuesioner Terstruktur",
+        desc: "Pengumpulan faktor pendorong internal & eksternal secara anonim.",
+      },
+      {
+        step: "03",
+        title: "Korelasi Statistik",
+        desc: "Analisis distribusi frekuensi & validasi silang antar variabel.",
+      },
+      {
+        step: "04",
+        title: "Rekomendasi Kebijakan",
+        desc: "Perumusan intervensi berbasis empati & evaluasi kurikulum.",
+      },
+    ],
   },
   {
     tickDate: "2025.05",
@@ -57,6 +124,28 @@ const roomMeta = [
     gravityFreq: "24.0 fps",
     quote1: "Five minutes of lived reality",
     quote2: "in the corridor of De Djawatan.",
+    telemetryNodes: [
+      {
+        step: "01",
+        title: "Riset Narasumber Lokal",
+        desc: "Pendekatan humanis bersama warga sekitar kawasan De Djawatan.",
+      },
+      {
+        step: "02",
+        title: "Golden Hour Cinematography",
+        desc: "Pengambilan gambar natural light di bawah kanopi pohon trembesi.",
+      },
+      {
+        step: "03",
+        title: "5-Minute Narrative Cut",
+        desc: "Penyuntingan ritme cerita dokumenter yang padat dan emosional.",
+      },
+      {
+        step: "04",
+        title: "Color Grading & Mastering",
+        desc: "Tone visual sinematik hangat dengan desain tata suara atmosferik.",
+      },
+    ],
   },
   {
     tickDate: "2024.09",
@@ -65,12 +154,40 @@ const roomMeta = [
     gravityFreq: "19.6 Hz",
     quote1: "gnosi ine dynami.",
     quote2: "Wearable pride — NO TURNING BACK.",
+    telemetryNodes: [
+      {
+        step: "01",
+        title: "Filosofi gnosi ine dynami",
+        desc: "Identitas kolektif kelas XI-2 SMAN 1 Giri: pengetahuan adalah kekuatan.",
+      },
+      {
+        step: "02",
+        title: "Tipografi NO TURNING BACK",
+        desc: "Komposisi grafis punggung berenergi tinggi dengan kontras tajam.",
+      },
+      {
+        step: "03",
+        title: "Vector Precision Artwork",
+        desc: "Detail emblem depan & belakang siap cetak sablon plastisol HD.",
+      },
+      {
+        step: "04",
+        title: " Studio Lookbook & Fitting",
+        desc: "Dokumentasi visual solidaritas angkatan dalam format editorial.",
+      },
+    ],
   },
 ];
 
-// Procedural bookcase shelf verticals for the 5D Tesseract backdrop
-const BOOKCASE_RIBS = Array.from({ length: 28 }, (_, i) => i);
-const BOOKCASE_TIERS = Array.from({ length: 7 }, (_, i) => i);
+interface BeamPulse {
+  axis: "x" | "y" | "z";
+  fixed1: number;
+  fixed2: number;
+  pos: number;
+  speed: number;
+  length: number;
+  bright: boolean;
+}
 
 export function ProjectRoom() {
   const [active, setActive] = useState(0);
@@ -78,9 +195,17 @@ export function ProjectRoom() {
   const [mediaProject, setMediaProject] = useState<Project | null>(null);
   const [lookbookProject, setLookbookProject] = useState<Project | null>(null);
 
-  // 3D Mouse Gyro Parallax & Hover Cursor state with hardware-accelerated springs
+  // Refs for the 3D Poggufanz Copper Tesseract Canvas & Interactive Monitor
+  const tesseractCanvasRef = useRef<HTMLCanvasElement>(null);
   const windowRef = useRef<HTMLDivElement>(null);
   const [isHoveringWindow, setIsHoveringWindow] = useState(false);
+
+  // Smooth camera & mouse state shared with the 60fps 3D canvas
+  const mouseTargetRef = useRef({ x: 0, y: 0 });
+  const activeRoomRef = useRef(0);
+  useEffect(() => {
+    activeRoomRef.current = active;
+  }, [active]);
 
   const mouseNormX = useMotionValue(0);
   const mouseNormY = useMotionValue(0);
@@ -89,12 +214,12 @@ export function ProjectRoom() {
 
   const springNormX = useSpring(mouseNormX, {
     stiffness: 220,
-    damping: 25,
+    damping: 26,
     mass: 0.6,
   });
   const springNormY = useSpring(mouseNormY, {
     stiffness: 220,
-    damping: 25,
+    damping: 26,
     mass: 0.6,
   });
 
@@ -109,13 +234,9 @@ export function ProjectRoom() {
     mass: 0.45,
   });
 
-  // 3D Monitor Gyro Tilt
-  const monitorRotateX = useTransform(springNormY, [-1, 1], [11, -11]);
-  const monitorRotateY = useTransform(springNormX, [-1, 1], [-14, 14]);
-
-  // Counter-parallax for the deep 5D Bookcase Lattice behind the monitor
-  const latticeShiftX = useTransform(springNormX, [-1, 1], [18, -18]);
-  const latticeShiftY = useTransform(springNormY, [-1, 1], [12, -12]);
+  // Subtle 3D Monitor Gyro Tilt inside the Recessed Bookcase Alcove
+  const monitorRotateX = useTransform(springNormY, [-1, 1], [7, -7]);
+  const monitorRotateY = useTransform(springNormX, [-1, 1], [-9, 9]);
 
   // Dynamic specular reflection across CRT screen
   const glareX = useTransform(springNormX, [-1, 1], ["15%", "85%"]);
@@ -124,26 +245,30 @@ export function ProjectRoom() {
   const total = projects.length;
   const p = projects[active];
   const meta = roomMeta[active] || roomMeta[0];
+  const prevMeta = roomMeta[(active - 1 + total) % total];
+  const nextMeta = roomMeta[(active + 1) % total];
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!windowRef.current) return;
-    const rect = windowRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    const nx = (x / rect.width) * 2 - 1;
-    const ny = (y / rect.height) * 2 - 1;
-
+  const handleStageMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    const ny = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+    mouseTargetRef.current = { x: nx, y: ny };
     mouseNormX.set(nx);
     mouseNormY.set(ny);
-    cursorX.set(x - 30);
-    cursorY.set(y - 30);
   };
 
-  const handleMouseLeave = () => {
+  const handleStageMouseLeave = () => {
+    mouseTargetRef.current = { x: 0, y: 0 };
     mouseNormX.set(0);
     mouseNormY.set(0);
     setIsHoveringWindow(false);
+  };
+
+  const handleMonitorMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!windowRef.current) return;
+    const rect = windowRef.current.getBoundingClientRect();
+    cursorX.set(e.clientX - rect.left - 28);
+    cursorY.set(e.clientY - rect.top - 28);
   };
 
   // Keyboard navigation: ArrowLeft & ArrowRight to scrub rooms
@@ -192,6 +317,398 @@ export function ProjectRoom() {
     }
   };
 
+  // =========================================================================
+  // 60FPS 3D PERSPECTIVE COPPER GIRDER LATTICE & BOOKCASE ALCOVE RENDERER
+  // Replicating Screenshot 5 (poggufanz.xyz Inside the Tesseract)
+  // =========================================================================
+  useEffect(() => {
+    const canvas = tesseractCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const resize = () => {
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    // 3D Lattice Structural Coordinates (World Space)
+    // Central recessed bookcase alcove sits at X: [-225, 225], Y: [-138, 138]
+    const X_COLS = [-680, -440, -225, 225, 440, 680];
+    const Y_ROWS = [-420, -275, -138, 138, 275, 420];
+    const Z_PLANES = [90, 220, 380, 580, 820, 1100];
+
+    // Pre-generate traveling photonic light streaks along X, Y, Z copper girders
+    const pulses: BeamPulse[] = [];
+    for (let i = 0; i < 38; i++) {
+      const axisChoice = i % 3;
+      if (axisChoice === 0) {
+        pulses.push({
+          axis: "x",
+          fixed1: Y_ROWS[i % Y_ROWS.length],
+          fixed2: Z_PLANES[i % (Z_PLANES.length - 1)],
+          pos: -680 + Math.random() * 1360,
+          speed: (2.2 + Math.random() * 3.2) * (i % 2 === 0 ? 1 : -1),
+          length: 65 + Math.random() * 85,
+          bright: i % 3 === 0,
+        });
+      } else if (axisChoice === 1) {
+        pulses.push({
+          axis: "y",
+          fixed1: X_COLS[i % X_COLS.length],
+          fixed2: Z_PLANES[i % (Z_PLANES.length - 1)],
+          pos: -420 + Math.random() * 840,
+          speed: (1.8 + Math.random() * 2.8) * (i % 2 === 0 ? 1 : -1),
+          length: 55 + Math.random() * 75,
+          bright: i % 2 === 0,
+        });
+      } else {
+        pulses.push({
+          axis: "z",
+          fixed1: X_COLS[i % X_COLS.length],
+          fixed2: Y_ROWS[i % Y_ROWS.length],
+          pos: 90 + Math.random() * 950,
+          speed: -3.5 - Math.random() * 4.5,
+          length: 80 + Math.random() * 110,
+          bright: true,
+        });
+      }
+    }
+
+    let camX = 0;
+    let camY = 0;
+    let roomShiftX = 0;
+    let lastRoom = activeRoomRef.current;
+    let rafId = 0;
+
+    const renderTesseract = () => {
+      const w = canvas.width;
+      const h = canvas.height;
+      if (w === 0 || h === 0) {
+        rafId = requestAnimationFrame(renderTesseract);
+        return;
+      }
+
+      // Detect room change for a dramatic 5D camera impulse shift
+      if (activeRoomRef.current !== lastRoom) {
+        const dir = activeRoomRef.current > lastRoom ? 1 : -1;
+        roomShiftX = dir * 95;
+        lastRoom = activeRoomRef.current;
+      }
+      roomShiftX *= 0.9;
+
+      // Smoothly interpolate camera toward mouse parallax + room scrub impulse
+      const targetX = mouseTargetRef.current.x * 38 + roomShiftX;
+      const targetY = mouseTargetRef.current.y * 24;
+      camX += (targetX - camX) * 0.08;
+      camY += (targetY - camY) * 0.08;
+
+      const cx = w * 0.5;
+      const cy = h * 0.46; // Center of the 3D alcove slightly above bottom timeline bar
+      const fov = Math.min(w, h) * 0.64;
+
+      const project = (x: number, y: number, z: number) => {
+        const dz = Math.max(25, z);
+        const scale = fov / dz;
+        return {
+          sx: cx + (x - camX) * scale,
+          sy: cy + (y - camY) * scale,
+          scale,
+        };
+      };
+
+      // 1. Deep 5D Void Background & Warm Copper Vanishing Glow
+      ctx.fillStyle = "#040408";
+      ctx.fillRect(0, 0, w, h);
+
+      const coreGlow = ctx.createRadialGradient(
+        cx - camX * 0.4,
+        cy - camY * 0.4,
+        10 * dpr,
+        cx,
+        cy,
+        w * 0.62
+      );
+      coreGlow.addColorStop(0, "rgba(245, 158, 11, 0.22)");
+      coreGlow.addColorStop(0.35, "rgba(180, 83, 9, 0.11)");
+      coreGlow.addColorStop(0.7, "rgba(120, 53, 15, 0.04)");
+      coreGlow.addColorStop(1, "rgba(4, 4, 8, 0)");
+      ctx.fillStyle = coreGlow;
+      ctx.fillRect(0, 0, w, h);
+
+      // Helper to draw a 3D shaded copper/bronze girder segment between two 3D points
+      const drawCopperGirder = (
+        x1: number,
+        y1: number,
+        z1: number,
+        x2: number,
+        y2: number,
+        z2: number,
+        thickness: number,
+        alphaMultiplier = 1
+      ) => {
+        const p1 = project(x1, y1, z1);
+        const p2 = project(x2, y2, z2);
+
+        const avgZ = (z1 + z2) * 0.5;
+        const depthFade = Math.max(0.06, Math.min(1, 1 - avgZ / 1180)) * alphaMultiplier;
+        const t1 = Math.max(1.2 * dpr, thickness * p1.scale);
+        const t2 = Math.max(1.2 * dpr, thickness * p2.scale);
+
+        const dx = p2.sx - p1.sx;
+        const dy = p2.sy - p1.sy;
+        const len = Math.hypot(dx, dy) || 1;
+        const nx = -dy / len;
+        const ny = dx / len;
+
+        // Dark 3D Bronze Metallic Body Fill
+        ctx.beginPath();
+        ctx.moveTo(p1.sx + nx * t1, p1.sy + ny * t1);
+        ctx.lineTo(p2.sx + nx * t2, p2.sy + ny * t2);
+        ctx.lineTo(p2.sx - nx * t2, p2.sy - ny * t2);
+        ctx.lineTo(p1.sx - nx * t1, p1.sy - ny * t1);
+        ctx.closePath();
+        ctx.fillStyle = `rgba(38, 20, 8, ${(depthFade * 0.88).toFixed(3)})`;
+        ctx.fill();
+
+        // Outer Copper Wireframe Flange Edges
+        ctx.beginPath();
+        ctx.moveTo(p1.sx + nx * t1, p1.sy + ny * t1);
+        ctx.lineTo(p2.sx + nx * t2, p2.sy + ny * t2);
+        ctx.moveTo(p1.sx - nx * t1, p1.sy - ny * t1);
+        ctx.lineTo(p2.sx - nx * t2, p2.sy - ny * t2);
+        ctx.strokeStyle = `rgba(217, 119, 6, ${(depthFade * 0.72).toFixed(3)})`;
+        ctx.lineWidth = Math.max(0.8 * dpr, 1.15 * dpr * depthFade);
+        ctx.stroke();
+
+        // Inner Specular Amber Core Line
+        ctx.beginPath();
+        ctx.moveTo(p1.sx, p1.sy);
+        ctx.lineTo(p2.sx, p2.sy);
+        ctx.strokeStyle = `rgba(254, 240, 138, ${(depthFade * 0.28).toFixed(3)})`;
+        ctx.lineWidth = Math.max(0.5 * dpr, 0.7 * dpr * depthFade);
+        ctx.stroke();
+      };
+
+      // 2. Render Deep Z-Receding Copper Struts (Back to Front)
+      for (let zi = Z_PLANES.length - 1; zi >= 0; zi--) {
+        const z = Z_PLANES[zi];
+
+        // Z-Axis Longitudinal Girders connecting Z_PLANES[zi] to Z_PLANES[zi - 1]
+        if (zi > 0) {
+          const zPrev = Z_PLANES[zi - 1];
+          for (const x of X_COLS) {
+            for (const y of Y_ROWS) {
+              drawCopperGirder(x, y, z, x, y, zPrev, 11, 0.85);
+            }
+          }
+        }
+
+        // Horizontal (X) Copper Girders on plane Z
+        for (const y of Y_ROWS) {
+          // Skip drawing across the middle monitor opening at front planes
+          if (z <= 380 && Math.abs(y) < 130) continue;
+          drawCopperGirder(-740, y, z, 740, y, z, 13, 0.95);
+        }
+
+        // Vertical (Y) Copper Girders on plane Z
+        for (const x of X_COLS) {
+          if (z <= 380 && Math.abs(x) < 220) continue;
+          drawCopperGirder(x, -460, z, x, 460, z, 13, 0.95);
+        }
+      }
+
+      // 3. Render the 3D Recessed Bookcase Alcove (Between Z = 135 and Z = 320 around the central screen)
+      // Top, Bottom, Left, Right angled 3D perspective library walls (Murphy's Bookcase)
+      const zFront = 135;
+      const zBack = 320;
+      const alcX = 225;
+      const alcY = 138;
+
+      // Left & Right Recessed Bookcase Walls with 6 Shelf Tiers & Vertical Book Spines
+      const shelfYLevels = [-138, -92, -46, 0, 46, 92, 138];
+      for (const side of [-1, 1]) {
+        const wallX = side * alcX;
+
+        // Angled bookcase wall dark backing
+        const tl = project(wallX, -alcY, zFront);
+        const tr = project(wallX, -alcY, zBack);
+        const br = project(wallX, alcY, zBack);
+        const bl = project(wallX, alcY, zFront);
+
+        ctx.beginPath();
+        ctx.moveTo(tl.sx, tl.sy);
+        ctx.lineTo(tr.sx, tr.sy);
+        ctx.lineTo(br.sx, br.sy);
+        ctx.lineTo(bl.sx, bl.sy);
+        ctx.closePath();
+        ctx.fillStyle = "rgba(18, 10, 4, 0.86)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(245, 158, 11, 0.45)";
+        ctx.lineWidth = 1.2 * dpr;
+        ctx.stroke();
+
+        // Horizontal 3D Shelf Planks receding from zFront to zBack
+        for (let si = 0; si < shelfYLevels.length; si++) {
+          const sy = shelfYLevels[si];
+          const pFront = project(wallX, sy, zFront);
+          const pBack = project(wallX, sy, zBack);
+
+          ctx.beginPath();
+          ctx.moveTo(pFront.sx, pFront.sy);
+          ctx.lineTo(pBack.sx, pBack.sy);
+          ctx.strokeStyle = "rgba(245, 158, 11, 0.55)";
+          ctx.lineWidth = 1.5 * dpr;
+          ctx.stroke();
+
+          // Procedural Vertical 3D Book Spines along each shelf
+          if (si < shelfYLevels.length - 1) {
+            const syBottom = shelfYLevels[si + 1];
+            const bookCount = 14;
+            for (let bi = 1; bi < bookCount; bi++) {
+              const bz = zFront + ((zBack - zFront) * bi) / bookCount;
+              const bookTop = sy + ((bi * 7 + si * 3) % 4) * 3.2;
+              const bt = project(wallX, bookTop, bz);
+              const bb = project(wallX, syBottom, bz);
+
+              const isGoldenStrand = (bi + si + activeRoomRef.current) % 5 === 0;
+              ctx.beginPath();
+              ctx.moveTo(bt.sx, bt.sy);
+              ctx.lineTo(bb.sx, bb.sy);
+              ctx.strokeStyle = isGoldenStrand
+                ? "rgba(254, 240, 138, 0.72)"
+                : "rgba(217, 119, 6, 0.34)";
+              ctx.lineWidth = (isGoldenStrand ? 1.8 : 1.0) * dpr;
+              ctx.stroke();
+            }
+          }
+        }
+      }
+
+      // Top & Bottom Recessed Alcove Ceiling/Floor Slats
+      for (const vSide of [-1, 1]) {
+        const wallY = vSide * alcY;
+        const fl = project(-alcX, wallY, zFront);
+        const fr = project(alcX, wallY, zFront);
+        const br = project(alcX, wallY, zBack);
+        const bl = project(-alcX, wallY, zBack);
+
+        ctx.beginPath();
+        ctx.moveTo(fl.sx, fl.sy);
+        ctx.lineTo(fr.sx, fr.sy);
+        ctx.lineTo(br.sx, br.sy);
+        ctx.lineTo(bl.sx, bl.sy);
+        ctx.closePath();
+        ctx.fillStyle = "rgba(15, 8, 3, 0.82)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(245, 158, 11, 0.4)";
+        ctx.lineWidth = 1.1 * dpr;
+        ctx.stroke();
+
+        // Perspective ribs on top/bottom alcove
+        for (let xi = -alcX + 30; xi < alcX; xi += 30) {
+          const pf = project(xi, wallY, zFront);
+          const pb = project(xi, wallY, zBack);
+          ctx.beginPath();
+          ctx.moveTo(pf.sx, pf.sy);
+          ctx.lineTo(pb.sx, pb.sy);
+          ctx.strokeStyle = "rgba(245, 158, 11, 0.25)";
+          ctx.lineWidth = 0.9 * dpr;
+          ctx.stroke();
+        }
+      }
+
+      // Outer & Inner Bold Copper Bezel Frames around the Alcove
+      drawCopperGirder(-alcX, -alcY, zFront, alcX, -alcY, zFront, 15, 1.15);
+      drawCopperGirder(-alcX, alcY, zFront, alcX, alcY, zFront, 15, 1.15);
+      drawCopperGirder(-alcX, -alcY, zFront, -alcX, alcY, zFront, 15, 1.15);
+      drawCopperGirder(alcX, -alcY, zFront, alcX, alcY, zFront, 15, 1.15);
+
+      // 4. Animate Photonic Light Pulses Traveling Along the 3D Copper Girders
+      for (const pulse of pulses) {
+        pulse.pos += pulse.speed;
+        let x1 = 0,
+          y1 = 0,
+          z1 = 0,
+          x2 = 0,
+          y2 = 0,
+          z2 = 0;
+
+        if (pulse.axis === "x") {
+          if (pulse.pos > 700) pulse.pos = -700;
+          if (pulse.pos < -700) pulse.pos = 700;
+          x1 = pulse.pos;
+          x2 = pulse.pos + pulse.length * Math.sign(pulse.speed);
+          y1 = y2 = pulse.fixed1;
+          z1 = z2 = pulse.fixed2;
+        } else if (pulse.axis === "y") {
+          if (pulse.pos > 440) pulse.pos = -440;
+          if (pulse.pos < -440) pulse.pos = 440;
+          x1 = x2 = pulse.fixed1;
+          y1 = pulse.pos;
+          y2 = pulse.pos + pulse.length * Math.sign(pulse.speed);
+          z1 = z2 = pulse.fixed2;
+        } else {
+          if (pulse.pos < 90) pulse.pos = 1050;
+          x1 = x2 = pulse.fixed1;
+          y1 = y2 = pulse.fixed2;
+          z1 = pulse.pos;
+          z2 = Math.min(1100, pulse.pos + pulse.length);
+        }
+
+        const p1 = project(x1, y1, z1);
+        const p2 = project(x2, y2, z2);
+        const alpha = Math.max(0.15, 1 - z1 / 1100);
+
+        const grad = ctx.createLinearGradient(p1.sx, p1.sy, p2.sx, p2.sy);
+        grad.addColorStop(
+          0,
+          pulse.bright
+            ? `rgba(255, 251, 235, ${(alpha * 0.95).toFixed(2)})`
+            : `rgba(245, 158, 11, ${(alpha * 0.85).toFixed(2)})`
+        );
+        grad.addColorStop(1, "rgba(245, 158, 11, 0)");
+
+        ctx.beginPath();
+        ctx.moveTo(p1.sx, p1.sy);
+        ctx.lineTo(p2.sx, p2.sy);
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = (pulse.bright ? 2.6 : 1.8) * dpr * Math.min(1.2, p1.scale * 1.4);
+        ctx.lineCap = "round";
+        ctx.stroke();
+      }
+
+      // 5. Radial Vignette so the outer edges blend into deep space while keeping copper girders sharp
+      const vignette = ctx.createRadialGradient(
+        cx,
+        cy,
+        w * 0.18,
+        cx,
+        cy,
+        w * 0.65
+      );
+      vignette.addColorStop(0, "rgba(4, 4, 8, 0)");
+      vignette.addColorStop(0.75, "rgba(4, 4, 8, 0.28)");
+      vignette.addColorStop(1, "rgba(4, 4, 8, 0.82)");
+      ctx.fillStyle = vignette;
+      ctx.fillRect(0, 0, w, h);
+
+      rafId = requestAnimationFrame(renderTesseract);
+    };
+
+    rafId = requestAnimationFrame(renderTesseract);
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
+
   return (
     <section
       id="works"
@@ -199,28 +716,13 @@ export function ProjectRoom() {
       aria-label="Inside the Tesseract — Project Room Terminal"
       className="relative border-t border-amber-500/15 bg-[#030409] pt-14 pb-20 sm:pt-20 sm:pb-28 overflow-x-hidden"
     >
-      {/* Top Event Horizon Golden Light Bridge (Connects seamlessly from HeroSingularity) */}
+      {/* Top Event Horizon Golden Light Bridge */}
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-amber-500/[0.1] via-amber-500/[0.02] to-transparent"
         aria-hidden="true"
       />
 
-      {/* Sci-Fi Background Starfield & Subtle Cosmic Copper Grid */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.045]"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.45) 1px, transparent 1px)",
-          backgroundSize: "32px 32px",
-        }}
-        aria-hidden="true"
-      />
-
-      {/* Ambient 5D Chamber Depth Glow */}
-      <div className="pointer-events-none absolute top-1/3 left-1/5 h-[540px] w-[540px] rounded-full bg-amber-500/[0.05] blur-[150px]" />
-      <div className="pointer-events-none absolute bottom-1/4 right-1/4 h-[620px] w-[620px] rounded-full bg-amber-600/[0.04] blur-[160px]" />
-
-      <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8 relative z-10">
         {/* =========================================================================
             HEADER: INSIDE THE TESSERACT (POGGUFANZ & INTERSTELLAR SPEC)
            ========================================================================= */}
@@ -236,7 +738,7 @@ export function ProjectRoom() {
               <h2 className="font-sans text-[36px] sm:text-[52px] md:text-[68px] font-black tracking-[-0.03em] text-white leading-none">
                 INSIDE THE <span className="text-amber-500">TESSERACT</span>
               </h2>
-              <p className="mt-4 max-w-[46ch] font-sans text-[14px] sm:text-[15px] leading-relaxed text-zinc-300">
+              <p className="mt-4 max-w-[48ch] font-sans text-[14px] sm:text-[15px] leading-relaxed text-zinc-300">
                 Past the horizon, time is a direction you can walk. Every project is a room in the lattice, lit at the moment it was built.
               </p>
             </div>
@@ -280,169 +782,70 @@ export function ProjectRoom() {
         </div>
 
         {/* =========================================================================
-            MAIN STAGE: 5D TESSERACT BOOKCASE ROOM (LEFT) + TYPOGRAPHIC READOUT (RIGHT)
+            MAIN STAGE: ZERO-SHIFT LOCKED HEIGHT GRID (POGGUFANZ SCREENSHOT 5)
+            Both columns are locked to h-[560px] sm:h-[600px] lg:h-[620px] so clicking
+            < or > NEVER shifts any element on the page!
            ========================================================================= */}
-        <div className="mt-10 sm:mt-12 grid gap-8 lg:grid-cols-[1.68fr_1fr] items-center">
-          {/* 5D Tesseract Bookcase Chamber Container */}
-          <div className="relative" style={{ perspective: "1400px" }}>
-            <div className="relative rounded-[26px] border border-amber-500/25 bg-[#05060A] p-4 sm:p-6 md:p-7 shadow-[0_0_70px_rgba(0,0,0,0.9),inset_0_0_60px_rgba(245,158,11,0.06)] overflow-hidden">
-              {/* =================================================================
-                  1. 3D COPPER/AMBER WIREFRAME LATTICE & VANISHING CORRIDOR
-                 ================================================================= */}
-              <motion.div
-                style={{
-                  x: latticeShiftX,
-                  y: latticeShiftY,
-                }}
-                className="pointer-events-none absolute inset-0 z-0 will-change-transform transform-gpu"
-                aria-hidden="true"
-              >
-                {/* Vanishing Point Perspective Copper Lattice SVG */}
-                <svg
-                  viewBox="0 0 800 520"
-                  preserveAspectRatio="none"
-                  className="h-full w-full opacity-55"
-                >
-                  <defs>
-                    <linearGradient id="copperBeamH" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.55" />
-                      <stop offset="25%" stopColor="#d97706" stopOpacity="0.22" />
-                      <stop offset="50%" stopColor="#fef08a" stopOpacity="0.08" />
-                      <stop offset="75%" stopColor="#d97706" stopOpacity="0.22" />
-                      <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.55" />
-                    </linearGradient>
-                    <linearGradient id="copperBeamV" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.65" />
-                      <stop offset="50%" stopColor="#b45309" stopOpacity="0.18" />
-                      <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.65" />
-                    </linearGradient>
-                    <radialGradient id="vanishingCore" cx="50%" cy="50%" r="50%">
-                      <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.22" />
-                      <stop offset="60%" stopColor="#b45309" stopOpacity="0.06" />
-                      <stop offset="100%" stopColor="#000000" stopOpacity="0" />
-                    </radialGradient>
-                  </defs>
+        <div className="mt-10 grid gap-6 lg:grid-cols-[1.58fr_1fr] items-stretch">
+          {/* =====================================================================
+              LEFT: 3D COPPER GIRDER TESSERACT CHAMBER + OVERLAID TIMELINE AXIS
+              Exact visual replication of Screenshot 5 (poggufanz.xyz)
+             ===================================================================== */}
+          <div
+            onMouseMove={handleStageMouseMove}
+            onMouseLeave={handleStageMouseLeave}
+            style={{ perspective: "1400px" }}
+            className="relative flex flex-col justify-between h-[540px] sm:h-[600px] lg:h-[620px] rounded-[24px] border border-amber-500/30 bg-[#040408] shadow-[0_0_80px_rgba(0,0,0,0.95),inset_0_0_70px_rgba(245,158,11,0.08)] overflow-hidden select-none"
+          >
+            {/* 1. Real-Time 60fps 3D Copper Girder & Bookcase Alcove Canvas */}
+            <canvas
+              ref={tesseractCanvasRef}
+              className="pointer-events-none absolute inset-0 h-full w-full z-0"
+            />
 
-                  {/* Deep Vanishing Chamber Core Glow */}
-                  <ellipse cx="400" cy="260" rx="320" ry="200" fill="url(#vanishingCore)" />
+            {/* 2. Ghosted Parallel Memory Echoes in Adjacent Lattice Cells (Screenshot 5 Detail) */}
+            <div
+              className="pointer-events-none absolute left-4 top-14 hidden md:block max-w-[165px] font-sans text-[11px] leading-snug text-amber-200/15 blur-[0.4px] z-10"
+              aria-hidden="true"
+            >
+              <p>{prevMeta.quote1}</p>
+              <p className="text-amber-500/20">{prevMeta.quote2}</p>
+            </div>
+            <div
+              className="pointer-events-none absolute right-4 top-20 hidden md:block max-w-[165px] text-right font-sans text-[11px] leading-snug text-amber-200/15 blur-[0.4px] z-10"
+              aria-hidden="true"
+            >
+              <p>{nextMeta.quote1}</p>
+              <p className="text-amber-500/20">{nextMeta.quote2}</p>
+            </div>
+            <div
+              className="pointer-events-none absolute left-5 bottom-28 hidden md:block max-w-[175px] font-sans text-[10.5px] leading-snug text-amber-200/12 blur-[0.5px] z-10"
+              aria-hidden="true"
+            >
+              <p>{nextMeta.quote1}</p>
+              <p className="text-amber-500/15">{nextMeta.quote2}</p>
+            </div>
 
-                  {/* Perspective Diagonal Corner Struts Converging to Central Vanishing Point (400, 260) */}
-                  <g stroke="url(#copperBeamH)" strokeWidth="1.2">
-                    <line x1="0" y1="0" x2="400" y2="260" />
-                    <line x1="800" y1="0" x2="400" y2="260" />
-                    <line x1="0" y1="520" x2="400" y2="260" />
-                    <line x1="800" y1="520" x2="400" y2="260" />
-                    {/* Intermediate 5D Hypercube Perspective Rays */}
-                    <line x1="200" y1="0" x2="400" y2="260" strokeOpacity="0.45" />
-                    <line x1="600" y1="0" x2="400" y2="260" strokeOpacity="0.45" />
-                    <line x1="200" y1="520" x2="400" y2="260" strokeOpacity="0.45" />
-                    <line x1="600" y1="520" x2="400" y2="260" strokeOpacity="0.45" />
-                    <line x1="0" y1="130" x2="400" y2="260" strokeOpacity="0.45" />
-                    <line x1="800" y1="130" x2="400" y2="260" strokeOpacity="0.45" />
-                    <line x1="0" y1="390" x2="400" y2="260" strokeOpacity="0.45" />
-                    <line x1="800" y1="390" x2="400" y2="260" strokeOpacity="0.45" />
-                  </g>
+            {/* 3. Top Chamber Telemetry Header */}
+            <div className="relative z-20 flex items-center justify-between px-4 sm:px-6 pt-4 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
+              <span className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-black/75 px-3 py-1 text-amber-300/95 backdrop-blur-md">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b] animate-pulse" />
+                ROOM 0{active + 1} // {p.category}
+              </span>
+              <span className="hidden sm:inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/75 px-3 py-1 text-zinc-300 backdrop-blur-md">
+                <span>{meta.dimensionCoord}</span>
+                <span className="text-amber-500">·</span>
+                <span className="text-amber-400">{meta.gravityFreq}</span>
+              </span>
+            </div>
 
-                  {/* Concentric Receding 3D Tesseract Depth Frames */}
-                  {[0.12, 0.24, 0.36, 0.48, 0.62, 0.76].map((scale, idx) => {
-                    const w = 800 * (1 - scale);
-                    const h = 520 * (1 - scale);
-                    const x = (800 - w) / 2;
-                    const y = (520 - h) / 2;
-                    return (
-                      <rect
-                        key={idx}
-                        x={x}
-                        y={y}
-                        width={w}
-                        height={h}
-                        rx={8}
-                        fill="none"
-                        stroke="#f59e0b"
-                        strokeWidth={idx % 2 === 0 ? "1.1" : "0.6"}
-                        strokeOpacity={0.34 - idx * 0.04}
-                      />
-                    );
-                  })}
-                </svg>
-
-                {/* =================================================================
-                    2. PROCEDURAL ENDLESS BOOKCASE WALL RIBS (MURPHY'S 5D LIBRARY)
-                   ================================================================= */}
-                <div className="absolute inset-3 sm:inset-4 flex flex-col justify-between opacity-45">
-                  {BOOKCASE_TIERS.map((tier) => (
-                    <div
-                      key={tier}
-                      className="relative flex-1 border-b border-amber-500/20 flex items-stretch justify-between px-2"
-                    >
-                      {/* Horizontal glowing copper shelf ledge */}
-                      <div className="absolute inset-x-0 bottom-0 h-[1.5px] bg-gradient-to-r from-amber-500/40 via-amber-300/20 to-amber-500/40 shadow-[0_0_8px_rgba(245,158,11,0.35)]" />
-
-                      {/* Vertical Bookcase Ribs & Time Strands */}
-                      {BOOKCASE_RIBS.map((rib) => {
-                        const isHighlightRib = (rib + tier * 3) % 5 === 0;
-                        const isGoldenStrand = (rib + active * 2) % 7 === 0;
-                        return (
-                          <div
-                            key={rib}
-                            className={`h-full transition-opacity duration-500 ${
-                              isGoldenStrand
-                                ? "w-[1.5px] bg-amber-300/60 shadow-[0_0_8px_#fef08a] animate-tesseract-pulse"
-                                : isHighlightRib
-                                ? "w-px bg-amber-500/35"
-                                : "w-px bg-amber-500/15"
-                            }`}
-                          />
-                        );
-                      })}
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-
-              {/* =================================================================
-                  3. GOLDEN VERTICAL LIGHT COLUMNS (SEPARATING TIME DIMENSIONS)
-                 ================================================================= */}
-              {/* Left Temporal Pillar */}
-              <div
-                className="pointer-events-none absolute left-3 sm:left-4 top-0 bottom-0 w-10 bg-gradient-to-r from-amber-500/22 via-amber-400/5 to-transparent z-10"
-                aria-hidden="true"
-              />
-              <div
-                className="pointer-events-none absolute left-3 sm:left-4 top-0 bottom-0 w-[1.5px] bg-gradient-to-b from-amber-400/20 via-amber-300/70 to-amber-400/20 shadow-[0_0_15px_#f59e0b] z-10"
-                aria-hidden="true"
-              />
-              {/* Right Temporal Pillar */}
-              <div
-                className="pointer-events-none absolute right-3 sm:right-4 top-0 bottom-0 w-10 bg-gradient-to-l from-amber-500/25 via-amber-400/5 to-transparent z-10"
-                aria-hidden="true"
-              />
-              <div
-                className="pointer-events-none absolute right-3 sm:right-4 top-0 bottom-0 w-[1.5px] bg-gradient-to-b from-amber-400/20 via-amber-300/75 to-amber-400/20 shadow-[0_0_15px_#f59e0b] z-10"
-                aria-hidden="true"
-              />
-
-              {/* Top Chamber Telemetry Bar */}
-              <div className="relative z-20 flex items-center justify-between pb-3.5 px-2 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
-                <span className="flex items-center gap-2 text-amber-300/90">
-                  <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b] animate-pulse" />
-                  ROOM 0{active + 1} &nbsp;//&nbsp; {p.category.toUpperCase()}
-                </span>
-                <span className="hidden sm:inline-flex items-center gap-2 text-zinc-400">
-                  <span>{meta.dimensionCoord}</span>
-                  <span className="text-amber-500/50">·</span>
-                  <span className="text-amber-400/90">LATTICE [0{active + 1}:0{total}]</span>
-                </span>
-              </div>
-
-              {/* =================================================================
-                  4. 3D FLOATING CRT / HOLOGRAM MONITOR (WITH GYRO TILT & ENTER BUBBLE)
-                 ================================================================= */}
+            {/* 4. Central Recessed Alcove Monitor Screen (Positioned inside the 3D Bookcase Opening) */}
+            <div className="relative z-20 my-auto mx-auto w-[84%] sm:w-[70%] md:w-[64%] max-w-[500px]">
               <motion.div
                 ref={windowRef}
-                onMouseMove={handleMouseMove}
+                onMouseMove={handleMonitorMouseMove}
                 onMouseEnter={() => setIsHoveringWindow(true)}
-                onMouseLeave={handleMouseLeave}
+                onMouseLeave={() => setIsHoveringWindow(false)}
                 onClick={handleEnterRoom}
                 tabIndex={0}
                 role="button"
@@ -458,28 +861,28 @@ export function ProjectRoom() {
                   rotateY: monitorRotateY,
                   transformStyle: "preserve-3d",
                 }}
-                className="group relative z-20 aspect-[16/10] sm:aspect-[16/9] w-full cursor-pointer overflow-hidden rounded-[20px] border-2 border-amber-500/45 bg-[#05060B] shadow-[0_0_50px_rgba(245,158,11,0.25),inset_0_0_32px_rgba(245,158,11,0.12)] transition-[border-color,box-shadow] duration-500 hover:border-amber-300/80 hover:shadow-[0_0_75px_rgba(245,158,11,0.42),inset_0_0_40px_rgba(245,158,11,0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 will-change-transform transform-gpu"
+                className="group relative aspect-[16/10] w-full cursor-pointer overflow-hidden rounded-[14px] border-2 border-amber-500/60 bg-[#050509] shadow-[0_0_65px_rgba(245,158,11,0.32),inset_0_0_40px_rgba(0,0,0,0.95)] transition-[border-color,box-shadow] duration-300 hover:border-amber-300 hover:shadow-[0_0_85px_rgba(245,158,11,0.52),inset_0_0_30px_rgba(245,158,11,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 will-change-transform transform-gpu"
               >
-                {/* Inner Hardware CRT Bezel Frame */}
+                {/* Inner Copper CRT Bezel */}
                 <div
-                  className="pointer-events-none absolute inset-[5px] rounded-[15px] border border-amber-400/20 z-30"
+                  className="pointer-events-none absolute inset-[4px] rounded-[10px] border border-amber-400/25 z-30"
                   aria-hidden="true"
                 />
 
-                {/* Dynamic Phosphor Scanlines Overlay */}
+                {/* Subtle CRT Scanlines */}
                 <div
-                  className="pointer-events-none absolute inset-0 opacity-[0.12] z-20 animate-scanlines"
+                  className="pointer-events-none absolute inset-0 opacity-[0.1] z-20"
                   style={{
                     backgroundImage:
-                      "linear-gradient(to bottom, rgba(254, 240, 138, 0.22) 1px, transparent 1px)",
+                      "linear-gradient(to bottom, rgba(254, 240, 138, 0.25) 1px, transparent 1px)",
                     backgroundSize: "100% 3px",
                   }}
                   aria-hidden="true"
                 />
 
-                {/* Dynamic Specular CRT Glass Glare */}
+                {/* Dynamic Specular Glare */}
                 <motion.div
-                  className="pointer-events-none absolute -inset-20 opacity-25 group-hover:opacity-40 transition-opacity duration-300 z-20"
+                  className="pointer-events-none absolute -inset-16 opacity-25 group-hover:opacity-45 transition-opacity duration-300 z-20"
                   style={{
                     background:
                       "radial-gradient(circle at center, rgba(254, 240, 138, 0.22) 0%, transparent 55%)",
@@ -490,126 +893,85 @@ export function ProjectRoom() {
                   aria-hidden="true"
                 />
 
-                {/* Hardware Corner Bolts (+) */}
-                <span className="absolute left-3.5 top-3 font-mono text-[11px] font-bold leading-none text-amber-400/90 z-30 select-none drop-shadow-[0_0_6px_rgba(245,158,11,0.8)]">
+                {/* Hardware Corner Crosshairs (+) */}
+                <span className="absolute left-2.5 top-2 font-mono text-[10px] font-bold leading-none text-amber-400/80 z-30">
                   +
                 </span>
-                <span className="absolute right-3.5 top-3 font-mono text-[11px] font-bold leading-none text-amber-400/90 z-30 select-none drop-shadow-[0_0_6px_rgba(245,158,11,0.8)]">
+                <span className="absolute right-2.5 top-2 font-mono text-[10px] font-bold leading-none text-amber-400/80 z-30">
                   +
                 </span>
-                <span className="absolute bottom-3 left-3.5 font-mono text-[11px] font-bold leading-none text-amber-400/90 z-30 select-none drop-shadow-[0_0_6px_rgba(245,158,11,0.8)]">
+                <span className="absolute bottom-2 left-2.5 font-mono text-[10px] font-bold leading-none text-amber-400/80 z-30">
                   +
                 </span>
-                <span className="absolute bottom-3 right-3.5 font-mono text-[11px] font-bold leading-none text-amber-400/90 z-30 select-none drop-shadow-[0_0_6px_rgba(245,158,11,0.8)]">
+                <span className="absolute bottom-2 right-2.5 font-mono text-[10px] font-bold leading-none text-amber-400/80 z-30">
                   +
                 </span>
 
-                {/* Animated Room Window Inner Feed */}
+                {/* Animated Room Feed */}
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={p.id}
-                    initial={{ opacity: 0, scale: 0.94, filter: "blur(6px)" }}
-                    animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                    exit={{ opacity: 0, scale: 1.05, filter: "blur(6px)" }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 360,
-                      damping: 30,
-                      mass: 0.8,
-                    }}
-                    className="absolute inset-0 flex flex-col justify-between p-5 sm:p-8 transform-gpu z-10"
+                    initial={{ opacity: 0, scale: 0.96 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 1.03 }}
+                    transition={{ duration: 0.22, ease: "easeOut" }}
+                    className="absolute inset-0 flex flex-col justify-between p-4 sm:p-6 z-10"
                   >
-                    {/* Background Visual: Project Image or 5D Bookcase Hologram Matrix */}
+                    {/* Background Project Image (Darkened like Poggufanz Alcove Screen) or Deep Grid */}
                     {p.image ? (
                       <div className="absolute inset-0">
                         <Image
                           src={p.image}
                           alt={p.title}
                           fill
-                          sizes="(max-width: 1024px) 100vw, 800px"
-                          className="object-cover object-center filter brightness-[0.68] contrast-[1.18] transition-transform duration-700 group-hover:scale-105"
+                          sizes="(max-width: 1024px) 85vw, 520px"
+                          className="object-cover object-center filter brightness-[0.42] contrast-[1.18] transition-transform duration-700 group-hover:scale-105"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/50 to-black/35" />
-                        <div className="absolute inset-0 bg-amber-500/[0.08] mix-blend-color-dodge pointer-events-none" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#040408]/95 via-[#040408]/65 to-[#040408]/55" />
                       </div>
                     ) : (
-                      /* Procedural 5D Holographic Bookcase Matrix for Non-Image Rooms */
-                      <div className="absolute inset-0 bg-gradient-to-br from-[#090A10] via-[#06070C] to-black overflow-hidden">
-                        {/* Glowing 5D Matrix Grid */}
+                      <div className="absolute inset-0 bg-[#05050A]">
                         <div
-                          className="pointer-events-none absolute inset-0 opacity-[0.18]"
+                          className="pointer-events-none absolute inset-0 opacity-[0.16]"
                           style={{
                             backgroundImage:
-                              "linear-gradient(to right, rgba(245,158,11,0.35) 1px, transparent 1px), linear-gradient(to bottom, rgba(245,158,11,0.2) 1px, transparent 1px)",
-                            backgroundSize: "28px 28px",
+                              "linear-gradient(to right, rgba(245,158,11,0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(245,158,11,0.18) 1px, transparent 1px)",
+                            backgroundSize: "24px 24px",
                           }}
                         />
-                        {/* Vertical golden bookcase light strands inside the CRT */}
-                        <div className="pointer-events-none absolute inset-x-8 inset-y-0 flex justify-around opacity-25">
-                          <div className="w-px h-full bg-gradient-to-b from-transparent via-amber-400 to-transparent" />
-                          <div className="w-[2px] h-full bg-gradient-to-b from-transparent via-amber-300 to-transparent shadow-[0_0_12px_#f59e0b]" />
-                          <div className="w-px h-full bg-gradient-to-b from-transparent via-amber-500 to-transparent" />
-                          <div className="w-[2px] h-full bg-gradient-to-b from-transparent via-amber-200 to-transparent shadow-[0_0_12px_#fef08a]" />
-                          <div className="w-px h-full bg-gradient-to-b from-transparent via-amber-500 to-transparent" />
-                        </div>
-                        <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-72 w-72 rounded-full bg-amber-500/[0.12] blur-3xl" />
                       </div>
                     )}
 
-                    {/* Top Monitor HUD Header Bar */}
-                    <div className="relative z-20 flex items-center justify-between pointer-events-none font-mono text-[9.5px] uppercase tracking-[0.2em]">
-                      <span className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-black/80 px-3 py-1 text-amber-300 backdrop-blur-md shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+                    {/* Top Mini Status */}
+                    <div className="relative z-20 flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-400">
+                      <span className="flex items-center gap-1.5 text-amber-300/90">
                         <Radio className="h-2.5 w-2.5 text-amber-400 animate-pulse" />
-                        ROOM 0{active + 1} &nbsp;·&nbsp; {p.category}
+                        {meta.shortName}
                       </span>
-                      <span className="rounded-full border border-white/15 bg-black/80 px-3 py-1 text-zinc-300 backdrop-blur-md">
-                        {p.year} &nbsp;·&nbsp; {meta.gravityFreq}
-                      </span>
+                      <span className="text-zinc-400">{meta.tickDate}</span>
                     </div>
 
-                    {/* Center Philosophical Sci-Fi Quote (Glowing Amber Typewriter Style) */}
-                    <div className="relative z-20 flex-1 flex flex-col items-center justify-center text-center px-4 py-3 select-none">
-                      <div className="mb-2.5 flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.28em] text-amber-400/75">
-                        <span className="h-px w-6 bg-amber-500/40" />
-                        <span>MEMORY STRAND 0{active + 1}</span>
-                        <span className="h-px w-6 bg-amber-500/40" />
-                      </div>
-
-                      <motion.p
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.35, delay: 0.05 }}
-                        className="font-sans text-[17px] sm:text-[21px] md:text-[24px] font-medium text-white leading-snug drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)]"
-                      >
-                        &ldquo;{meta.quote1}
-                      </motion.p>
-                      <motion.p
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: 0.14 }}
-                        className="mt-1 font-sans text-[17px] sm:text-[21px] md:text-[24px] font-semibold text-amber-400 leading-snug drop-shadow-[0_0_20px_rgba(245,158,11,0.55)]"
-                      >
-                        {meta.quote2}&rdquo;
-                      </motion.p>
+                    {/* Center Quote (Poggufanz Screenshot 5 Exact Two-Tone Typography) */}
+                    <div className="relative z-20 my-auto text-center px-2">
+                      <p className="font-sans text-[15px] sm:text-[18px] md:text-[20px] font-medium text-white leading-snug drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)]">
+                        {meta.quote1}
+                      </p>
+                      <p className="mt-1 font-sans text-[15px] sm:text-[18px] md:text-[20px] font-semibold text-amber-400 leading-snug drop-shadow-[0_0_18px_rgba(245,158,11,0.55)]">
+                        {meta.quote2}
+                      </p>
                     </div>
 
-                    {/* Bottom Monitor Telemetry Tag Bar: Date + "Click to enter" */}
-                    <div className="relative z-20 flex items-center justify-between pointer-events-none font-mono text-[10px] uppercase tracking-[0.2em] border-t border-amber-500/20 pt-2.5">
-                      <span className="text-zinc-300 drop-shadow flex items-center gap-2">
-                        <span className="text-amber-400 font-bold">{meta.tickDate}</span>
-                        <span className="text-zinc-600">·</span>
-                        <span className="text-amber-300 font-semibold underline decoration-amber-500/50 underline-offset-4">
-                          CLICK TO ENTER
-                        </span>
+                    {/* Bottom Screen Action Prompt */}
+                    <div className="relative z-20 flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-400 border-t border-amber-500/20 pt-2">
+                      <span className="text-amber-300 font-semibold group-hover:text-white transition-colors">
+                        CLICK TO ENTER ROOM →
                       </span>
-                      <span className="text-zinc-400 hidden sm:inline">
-                        SIGNAL // {p.status || "ACTIVE"}
-                      </span>
+                      <span className="text-zinc-500">{p.status || "ACTIVE"}</span>
                     </div>
                   </motion.div>
                 </AnimatePresence>
 
-                {/* Floating "Enter" Orange Cursor Bubble (Follows Mouse Pointer smoothly) */}
+                {/* Floating "Enter" Cursor Bubble */}
                 <motion.div
                   initial={false}
                   style={{
@@ -623,291 +985,285 @@ export function ProjectRoom() {
                     scale: isHoveringWindow ? 1 : 0.5,
                   }}
                   transition={{
-                    opacity: { duration: 0.18 },
+                    opacity: { duration: 0.15 },
                     scale: { type: "spring", stiffness: 450, damping: 26 },
                   }}
-                  className="pointer-events-none absolute z-40 hidden sm:flex h-[60px] w-[60px] items-center justify-center rounded-full bg-amber-500 font-sans text-[12px] font-bold tracking-tight text-black shadow-[0_0_30px_rgba(245,158,11,0.95)] ring-2 ring-amber-200/80"
+                  className="pointer-events-none absolute z-40 hidden sm:flex h-[54px] w-[54px] items-center justify-center rounded-full bg-amber-500 font-sans text-[11px] font-bold text-black shadow-[0_0_25px_rgba(245,158,11,0.95)] ring-2 ring-amber-200/80"
                   aria-hidden="true"
                 >
                   Enter
                 </motion.div>
               </motion.div>
+            </div>
 
-              {/* Bottom Chamber Status Bar */}
-              <div className="relative z-20 mt-3.5 flex items-center justify-between px-2 font-mono text-[10px] text-zinc-400">
-                <span className="tracking-[0.16em] truncate max-w-[70%]">
-                  SYSTEM: <strong className="text-zinc-200 font-normal">{p.signal || p.summary}</strong>
-                </span>
-                <span className="text-amber-400 tracking-widest hidden sm:inline-flex items-center gap-1.5">
-                  <Sparkles className="h-3 w-3 text-amber-400" />
-                  TESSERACT STAGE 0{active + 1}
-                </span>
+            {/* 5. Docked Bottom Timeline Scrubber Overlay (Matches Screenshot 5 Poggufanz 1:1 & Never Shifts!) */}
+            <div className="relative z-20 border-t border-amber-500/25 bg-gradient-to-t from-[#030408] via-[#05060C]/95 to-[#05060C]/80 px-4 sm:px-6 pt-3.5 pb-4 backdrop-blur-md">
+              <div className="flex items-center justify-between gap-4 mb-3">
+                {/* Room Index Counter 01 / 05 */}
+                <div className="flex items-center gap-3">
+                  <span className="font-mono text-[12px] sm:text-[13px] font-bold tracking-[0.18em] text-amber-400 tabular-nums">
+                    0{active + 1} <span className="text-zinc-600">/</span> 0{total}
+                  </span>
+                  <span className="hidden sm:inline-flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[0.16em] text-zinc-400">
+                    <Compass className="h-3 w-3 text-amber-500" />
+                    5D Temporal Axis
+                  </span>
+                </div>
+
+                {/* Locked-Position Prev / Next Arrow Buttons (Cursor Never Loses Target!) */}
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={goToPrev}
+                    disabled={active === 0}
+                    aria-label="Previous project room"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-200 disabled:opacity-25 disabled:cursor-not-allowed hover:border-amber-400 hover:bg-amber-500/25 hover:text-white active:scale-95 transition-all cursor-pointer"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={goToNext}
+                    disabled={active === total - 1}
+                    aria-label="Next project room"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-200 disabled:opacity-25 disabled:cursor-not-allowed hover:border-amber-400 hover:bg-amber-500/25 hover:text-white active:scale-95 transition-all cursor-pointer"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Horizontal Node Track (o----o----o----o----o with Dates 2026.02 -> 2024.09) */}
+              <div className="relative pt-1">
+                <div className="absolute top-[10px] left-[8%] right-[8%] h-[1.5px] bg-white/15" />
+                <div
+                  className="absolute top-[10px] left-[8%] h-[1.5px] bg-gradient-to-r from-amber-500 via-amber-400 to-amber-200 transition-all duration-300 shadow-[0_0_10px_#f59e0b]"
+                  style={{
+                    width: `${(active / Math.max(1, total - 1)) * 84}%`,
+                  }}
+                />
+
+                <div className="relative grid grid-cols-5">
+                  {projects.map((proj, i) => {
+                    const isActive = i === active;
+                    const m = roomMeta[i] || roomMeta[0];
+                    return (
+                      <button
+                        key={proj.id}
+                        type="button"
+                        onClick={() => setActive(i)}
+                        aria-label={`Select Room 0${i + 1}: ${proj.title}`}
+                        aria-pressed={isActive}
+                        className="group flex flex-col items-center focus-visible:outline-none cursor-pointer"
+                      >
+                        <span
+                          className={`h-3 w-3 rounded-full border-2 transition-all duration-200 ${
+                            isActive
+                              ? "bg-amber-400 border-white shadow-[0_0_14px_#f59e0b] scale-125"
+                              : "bg-[#05060C] border-amber-500/40 group-hover:border-amber-300"
+                          }`}
+                        />
+                        <span
+                          className={`mt-2 font-mono text-[10px] tracking-wider transition-colors ${
+                            isActive
+                              ? "text-amber-300 font-bold"
+                              : "text-zinc-500 group-hover:text-zinc-300"
+                          }`}
+                        >
+                          {m.tickDate}
+                        </span>
+                        <span
+                          className={`font-mono text-[8.5px] uppercase tracking-wider truncate max-w-[72px] sm:max-w-[96px] ${
+                            isActive
+                              ? "text-white font-medium"
+                              : "text-zinc-600 group-hover:text-zinc-400"
+                          }`}
+                        >
+                          {m.shortName}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* =========================================================================
-              RIGHT: TYPOGRAPHIC READOUT (POGGUFANZ EXACT SPEC)
-             ========================================================================= */}
-          <div className="flex flex-col">
-            {/* Kicker */}
-            <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-amber-500">
-              <span className="font-bold">0{active + 1}</span>
-              <span className="h-px w-5 bg-amber-500/50" />
-              <span>{p.category}</span>
-              <span className="text-zinc-600">·</span>
-              <span className="text-zinc-400">{meta.tickDate}</span>
-            </p>
+          {/* =====================================================================
+              RIGHT: ZERO-SHIFT LOCKED HEIGHT TYPOGRAPHIC READOUT PANEL
+              Fixed height (lg:h-[620px]) + uniform 4-node telemetry grid on ALL rooms
+              so switching rooms NEVER changes layout height!
+             ===================================================================== */}
+          <div className="flex flex-col justify-between lg:h-[620px] rounded-[24px] border border-white/10 bg-[#06070D]/90 p-5 sm:p-7 backdrop-blur-md shadow-[0_0_50px_rgba(0,0,0,0.6)]">
+            {/* Top Section: Kicker + Quick Arrows + Title + Spec Row */}
+            <div>
+              <div className="flex items-center justify-between gap-2">
+                <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-amber-500">
+                  <span className="font-bold">0{active + 1}</span>
+                  <span className="h-px w-5 bg-amber-500/50" />
+                  <span className="truncate">{p.category}</span>
+                  <span className="text-zinc-600">·</span>
+                  <span className="text-zinc-400">{meta.tickDate}</span>
+                </p>
 
-            {/* Readout Title */}
-            <h3 className="mt-2.5 font-sans text-[30px] sm:text-[38px] lg:text-[42px] font-black leading-tight text-white tracking-[-0.02em]">
-              {p.title}
-            </h3>
-
-            {/* Readout Spec Grid (Period · Status · Signal) */}
-            <dl className="mt-6 grid grid-cols-3 gap-3 border-y border-white/10 py-4 font-mono">
-              <div>
-                <dt className="text-[9.5px] uppercase tracking-[0.18em] text-zinc-500">
-                  Period
-                </dt>
-                <dd className="mt-1 text-[11.5px] font-medium text-zinc-200">
-                  {p.year}
-                </dd>
+                {/* Secondary Stationary Prev/Next Arrows in Readout Header */}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={goToPrev}
+                    disabled={active === 0}
+                    aria-label="Previous room"
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-zinc-300 disabled:opacity-25 disabled:cursor-not-allowed hover:border-amber-500/40 hover:text-white transition-colors cursor-pointer"
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={goToNext}
+                    disabled={active === total - 1}
+                    aria-label="Next room"
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-zinc-300 disabled:opacity-25 disabled:cursor-not-allowed hover:border-amber-500/40 hover:text-white transition-colors cursor-pointer"
+                  >
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               </div>
-              <div>
-                <dt className="text-[9.5px] uppercase tracking-[0.18em] text-zinc-500">
-                  Status
-                </dt>
-                <dd className="mt-1 flex items-center gap-1.5 text-[11.5px] font-medium text-[#fef08a]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse" />
-                  {p.status || "Active"}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-[9.5px] uppercase tracking-[0.18em] text-zinc-500">
-                  Signal
-                </dt>
-                <dd className="mt-1 text-[11px] font-medium text-amber-300/90 truncate">
-                  {p.signal ? p.signal.split("·")[0] : p.highlight}
-                </dd>
-              </div>
-            </dl>
 
-            {/* Description */}
-            <p className="mt-5 font-sans text-[14.5px] leading-relaxed text-zinc-300">
-              {p.description}
-            </p>
+              {/* Fixed-Height Title Slot (1-2 lines locked) */}
+              <div className="mt-2 min-h-[68px] sm:min-h-[76px] flex items-center">
+                <h3 className="font-sans text-[26px] sm:text-[32px] lg:text-[34px] font-black leading-[1.1] text-white tracking-[-0.02em] line-clamp-2">
+                  {p.title}
+                </h3>
+              </div>
 
-            {/* Factual Operational Pipeline (e.g., Smart-Node Logistics 4-Step QR -> WA -> VPS -> DVRP) */}
-            {p.caseStudy?.workflowSteps && p.caseStudy.workflowSteps.length > 0 && (
-              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-xl border border-amber-500/20 bg-amber-500/[0.03] p-3">
-                {p.caseStudy.workflowSteps.map((wf) => (
+              {/* Readout Spec Grid (Period · Status · Signal) */}
+              <dl className="mt-3 grid grid-cols-3 gap-3 border-y border-white/10 py-3 font-mono">
+                <div>
+                  <dt className="text-[9px] uppercase tracking-[0.18em] text-zinc-500">
+                    Period
+                  </dt>
+                  <dd className="mt-0.5 text-[11px] font-medium text-zinc-200 truncate">
+                    {p.year}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[9px] uppercase tracking-[0.18em] text-zinc-500">
+                    Status
+                  </dt>
+                  <dd className="mt-0.5 flex items-center gap-1.5 text-[11px] font-medium text-[#fef08a] truncate">
+                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse" />
+                    <span className="truncate">{p.status || "Active"}</span>
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[9px] uppercase tracking-[0.18em] text-zinc-500">
+                    Signal
+                  </dt>
+                  <dd className="mt-0.5 text-[10.5px] font-medium text-amber-300/90 truncate">
+                    {p.signal ? p.signal.split("·")[0] : p.highlight}
+                  </dd>
+                </div>
+              </dl>
+
+              {/* Fixed-Height Description Slot (3 lines locked) */}
+              <p className="mt-3.5 min-h-[66px] font-sans text-[13.5px] leading-relaxed text-zinc-300 line-clamp-3">
+                {p.description}
+              </p>
+            </div>
+
+            {/* Middle Section: Uniform 2x2 Operational Telemetry Grid (Present on ALL 5 rooms!) */}
+            <div className="my-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.03] p-3">
+              <div className="mb-2 flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.18em] text-amber-400/80">
+                <span className="flex items-center gap-1.5">
+                  <Layers className="h-3 w-3 text-amber-400" />
+                  <span>ROOM TELEMETRY // 4-NODE ARCHITECTURE</span>
+                </span>
+                <span className="text-zinc-500">{meta.gravityFreq}</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {meta.telemetryNodes.map((wf) => (
                   <div
                     key={wf.step}
-                    className="flex items-start gap-2 rounded-lg border border-white/5 bg-black/40 p-2"
+                    className="flex items-start gap-2 rounded-lg border border-white/5 bg-black/50 p-2 h-[60px] overflow-hidden"
                   >
                     <span className="mt-0.5 inline-flex h-4 w-5 shrink-0 items-center justify-center rounded bg-amber-500/20 font-mono text-[9px] font-bold text-amber-400">
                       {wf.step}
                     </span>
                     <div className="min-w-0">
-                      <p className="font-mono text-[10.5px] font-semibold text-[#fef08a] leading-tight">
+                      <p className="font-mono text-[10px] font-semibold text-[#fef08a] leading-tight truncate">
                         {wf.title}
                       </p>
-                      <p className="mt-0.5 font-sans text-[11px] leading-snug text-zinc-400 line-clamp-2">
+                      <p className="mt-0.5 font-sans text-[10.5px] leading-tight text-zinc-400 line-clamp-2">
                         {wf.desc}
                       </p>
                     </div>
                   </div>
                 ))}
               </div>
-            )}
+            </div>
 
-            {/* Tech Stack Chips */}
-            <ul
-              className="mt-5 flex flex-wrap gap-1.5 font-mono text-[10.5px] text-zinc-300"
-              aria-label="Stack"
-            >
-              {p.stack.map((s) => (
-                <li
-                  key={s}
-                  className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 hover:border-amber-500/40 hover:text-amber-200 transition-colors"
-                >
-                  {s}
-                </li>
-              ))}
-            </ul>
-
-            {/* Readout Action Buttons: Enter room → + Code + Links */}
-            <div className="mt-7 flex flex-wrap items-center gap-3 pt-5 border-t border-white/[0.08]">
-              {/* Primary "Enter room →" Button with Attached Circular Amber Port */}
-              <button
-                type="button"
-                onClick={handleEnterRoom}
-                className="group inline-flex items-center rounded-full bg-white text-black font-mono text-[11.5px] font-semibold transition-all hover:bg-zinc-200 active:scale-95 cursor-pointer shadow-[0_0_25px_rgba(255,255,255,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            {/* Bottom Section: Stack Chips + Action Buttons */}
+            <div>
+              {/* Tech Stack Chips (Single-row horizontal scroll or neat clamp) */}
+              <ul
+                className="flex flex-wrap gap-1.5 font-mono text-[10px] text-zinc-300 max-h-[58px] overflow-hidden"
+                aria-label="Stack"
               >
-                <span className="py-2.5 pl-4 pr-2">Enter room</span>
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500 text-black mr-1 transition-transform duration-300 group-hover:translate-x-0.5">
-                  <ArrowRight className="h-4 w-4" />
+                {p.stack.slice(0, 6).map((s) => (
+                  <li
+                    key={s}
+                    className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-0.5 hover:border-amber-500/40 hover:text-amber-200 transition-colors"
+                  >
+                    {s}
+                  </li>
+                ))}
+              </ul>
+
+              {/* Action Buttons Bar */}
+              <div className="mt-4 flex flex-wrap items-center gap-2.5 pt-3.5 border-t border-white/[0.08]">
+                <button
+                  type="button"
+                  onClick={handleEnterRoom}
+                  className="group inline-flex items-center rounded-full bg-white text-black font-mono text-[11px] font-semibold transition-all hover:bg-zinc-200 active:scale-95 cursor-pointer shadow-[0_0_25px_rgba(255,255,255,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                >
+                  <span className="py-2 pl-4 pr-2">Enter room</span>
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500 text-black mr-1 transition-transform duration-300 group-hover:translate-x-0.5">
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </span>
+                </button>
+
+                {p.codeUrl && (
+                  <a
+                    href={p.codeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-[34px] items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3.5 font-mono text-[10.5px] text-zinc-300 hover:border-white/30 hover:text-white transition-colors"
+                  >
+                    <Github className="h-3.5 w-3.5" />
+                    <span>Code</span>
+                    <ArrowUpRight className="h-3 w-3 text-zinc-500" />
+                  </a>
+                )}
+
+                {p.demoUrl && p.demoUrl !== "#" && (
+                  <a
+                    href={p.demoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-[34px] items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3.5 font-mono text-[10.5px] text-zinc-300 hover:border-amber-500/40 hover:text-amber-400 transition-colors"
+                  >
+                    <span>Live Demo</span>
+                    <ArrowUpRight className="h-3 w-3 text-zinc-500" />
+                  </a>
+                )}
+
+                <span className="ml-auto hidden sm:inline-flex items-center gap-1 font-mono text-[10px] text-amber-300/80">
+                  <Sparkles className="h-3 w-3 text-amber-400" />
+                  STAGE 0{active + 1}
                 </span>
-              </button>
-
-              {/* GitHub Link */}
-              {p.codeUrl && (
-                <a
-                  href={p.codeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-[38px] items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-4 font-mono text-[11px] text-zinc-300 hover:border-white/30 hover:text-white transition-colors"
-                >
-                  <Github className="h-3.5 w-3.5" />
-                  <span>Code</span>
-                  <ArrowUpRight className="h-3 w-3 text-zinc-500" />
-                </a>
-              )}
-
-              {/* Live Demo or External Link */}
-              {p.demoUrl && p.demoUrl !== "#" && (
-                <a
-                  href={p.demoUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-[38px] items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-4 font-mono text-[11px] text-zinc-300 hover:border-amber-500/40 hover:text-amber-400 transition-colors"
-                >
-                  <span>Live Demo</span>
-                  <ArrowUpRight className="h-3 w-3 text-zinc-500" />
-                </a>
-              )}
-
-              {/* Context Tag */}
-              <span className="inline-flex min-h-[38px] items-center rounded-full border border-amber-500/20 bg-amber-500/[0.04] px-3.5 font-mono text-[10.5px] text-amber-300/90">
-                {p.context || p.highlight}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* =========================================================================
-            PRECISION TIMELINE AXIS SCRUBBER (2026.02 → 2024.09)
-           ========================================================================= */}
-        <div className="mt-14 rounded-2xl border border-amber-500/20 bg-[#07080D]/90 p-5 sm:p-7 backdrop-blur-md shadow-[0_0_40px_rgba(0,0,0,0.6)]">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-2.5">
-              <span className="h-2 w-2 rounded-full bg-amber-500 shadow-[0_0_10px_#f59e0b]" />
-              <p className="font-mono text-[10.5px] uppercase tracking-[0.2em] text-zinc-300">
-                Timeline Axis // 5D Temporal Scrubber
-              </p>
-              <span className="hidden md:inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/[0.03] px-2 py-0.5 font-mono text-[9.5px] text-zinc-500">
-                <Compass className="h-2.5 w-2.5 text-amber-500" />
-                Use ← / → keys or slider
-              </span>
-            </div>
-
-            <div className="flex items-center gap-4">
-              {/* Room Counter 01 / 05 */}
-              <span className="font-mono text-[13px] font-bold tracking-[0.16em] text-amber-400 tabular-nums">
-                0{active + 1} &nbsp;<span className="text-zinc-600">/</span>&nbsp; 0{total}
-              </span>
-
-              {/* Prev / Next buttons */}
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={goToPrev}
-                  disabled={active === 0}
-                  aria-label="Previous project room"
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-300 disabled:opacity-30 disabled:cursor-not-allowed hover:border-amber-500/40 hover:bg-amber-500/10 hover:text-white transition-colors cursor-pointer"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={goToNext}
-                  disabled={active === total - 1}
-                  aria-label="Next project room"
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-300 disabled:opacity-30 disabled:cursor-not-allowed hover:border-amber-500/40 hover:bg-amber-500/10 hover:text-white transition-colors cursor-pointer"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
               </div>
             </div>
           </div>
-
-          {/* Timeline Axis Track with Precision Ticks */}
-          <div className="relative mt-8 mb-4">
-            {/* Base Horizontal Track Line */}
-            <div className="absolute top-[8px] h-[2px] w-full bg-white/10 -translate-y-1/2" />
-
-            {/* Glowing Active Progress Bar */}
-            <div
-              className="absolute top-[8px] h-[2px] -translate-y-1/2 bg-gradient-to-r from-amber-600 via-amber-400 to-amber-200 transition-all duration-300 shadow-[0_0_12px_#f59e0b]"
-              style={{ width: `${(active / Math.max(1, total - 1)) * 100}%` }}
-            />
-
-            {/* Ticks and Room Buttons */}
-            <div className="relative flex justify-between">
-              {projects.map((proj, i) => {
-                const isActive = i === active;
-                const m = roomMeta[i] || roomMeta[0];
-                return (
-                  <button
-                    key={proj.id}
-                    type="button"
-                    onClick={() => setActive(i)}
-                    aria-label={`Select Room 0${i + 1}: ${proj.title}`}
-                    aria-pressed={isActive}
-                    className="group relative flex flex-col items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded-lg p-1 transition-all duration-200 cursor-pointer"
-                  >
-                    {/* Tick Mark / Circle */}
-                    <span
-                      className={`h-3.5 w-3.5 rounded-full border-2 transition-all duration-300 ${
-                        isActive
-                          ? "bg-amber-400 border-amber-100 shadow-[0_0_16px_#f59e0b] scale-125"
-                          : "bg-[#07080D] border-white/25 group-hover:border-amber-400 group-hover:scale-110"
-                      }`}
-                    />
-
-                    {/* Tick Date & Project Name */}
-                    <div className="mt-3 flex flex-col items-center font-mono text-center">
-                      <span
-                        className={`text-[10.5px] tracking-wider transition-colors ${
-                          isActive
-                            ? "text-amber-400 font-bold"
-                            : "text-zinc-500 group-hover:text-zinc-300"
-                        }`}
-                      >
-                        {m.tickDate}
-                      </span>
-                      <span
-                        className={`text-[9.5px] uppercase tracking-wider transition-colors max-w-[96px] truncate ${
-                          isActive
-                            ? "text-white font-semibold"
-                            : "text-zinc-600 group-hover:text-zinc-400"
-                        }`}
-                      >
-                        {m.shortName}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Interactive Range Slider */}
-          <input
-            type="range"
-            min={0}
-            max={total - 1}
-            step={1}
-            value={active}
-            onChange={(e) => setActive(Number(e.target.value))}
-            className="tesseract-scrubber mt-5 w-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
-            aria-label="Scrub projects timeline"
-            aria-valuemin={0}
-            aria-valuemax={total - 1}
-            aria-valuenow={active}
-            aria-valuetext={p.title}
-          />
         </div>
       </div>
 
